@@ -3,12 +3,12 @@ from jax.scipy.special import erfc
 from jewald import axes_pos, lattice, sofk
 
 def make_ewald(axes, rckc=30.0):
-  rvecs, kvecs = lattice.make_lattice(axes, rckc)
-  rc, kc = lattice.compute_cutoffs(axes, rckc)
+  rvecs, kvecs = lattice.make_lattice(axes, rckc)       #lattice vectors in real and reciprocal space
+  rc, kc = lattice.compute_cutoffs(axes, rckc)          #real-space and reciprocal-space cutoff distances
   a = alpha(rc, kc)
-  ndim = len(axes)
+  ndim = len(axes)                                      #number of dimensions
   omega = axes_pos.volume(axes)
-  ew = Ewald(a, ndim, omega)
+  ew = Ewald(a, ndim, omega)                            #ewald object
   return ew, rvecs, kvecs
 
 def alpha(rc, kc):
