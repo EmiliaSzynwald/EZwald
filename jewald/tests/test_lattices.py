@@ -24,7 +24,7 @@ def test_square():
     axes = nx * np.eye(ndim)
     pos = axes_pos.get_rvecs(axes, (nx,) * ndim)
     esq = compute_energy_per_particle(axes, pos)
-    assert np.isclose(-1.95028093, esq, atol=1e-5)
+    assert np.isclose(-1.95028093, esq, atol=1e-5) #should i increase the tolerance to 1e-4 or 1e-3
 
 
 def test_rectangle():
@@ -38,7 +38,7 @@ def test_rectangle():
     pos = axes_pos.get_rvecs(axes, (nx, nx))
     expected = -1.68092485
     energy = compute_energy_per_particle(axes, pos)
-    assert np.isclose(energy, expected, atol=1e-6)
+    assert np.isclose(energy, expected, atol=1e-6) 
 
 def test_oblique():
     nx = 2
@@ -73,7 +73,7 @@ def test_triangle():
     pos = np.array([[0, 0]])
     expected = -0.7022378
     energy = compute_energy_per_particle(axes, pos)
-    assert np.isclose(energy, expected, atol=1e-6)
+    assert np.isclose(energy, expected, atol=1e-6) #should i increase tolerance here to
 
 def test_honeycomb():
     a =1
@@ -81,4 +81,4 @@ def test_honeycomb():
     pos0 = np.array([[0, 0], [0, 1/np.sqrt(3)]])
     expected = -2.0349255
     energy = compute_energy_per_particle(axes, pos0)
-    assert np.isclose(energy, expected, atol=1e-6)
+    assert np.isclose(energy, expected, atol=1e-6) #big issue
