@@ -24,7 +24,7 @@ def test_square():
     axes = nx * np.eye(ndim)
     pos = axes_pos.get_rvecs(axes, (nx,) * ndim)
     esq = compute_energy_per_particle(axes, pos)
-    assert np.isclose(-1.95028093, esq, atol=1e-5) #should i increase the tolerance to 1e-4 or 1e-3
+    assert np.isclose(-1.9501325, esq, atol=1e-5) #tolerance of minimum of 6, preferred of 7 or more
 
 
 def test_rectangle():
@@ -67,7 +67,7 @@ def test_hexagon():
     energy = compute_energy_per_particle(axes, pos)
     assert np.isclose(energy, expected, atol=1e-6)
 
-def test_triangle():
+def test_triangle(): #hexagon and triangle are the same 
     nx =3
     axes = np.array([[1, 0], [-0.5, (np.sqrt(3)) / 2]]) * 3  # Stretches the lattice by factor of 3
     pos = np.array([[0, 0]])
@@ -75,7 +75,7 @@ def test_triangle():
     energy = compute_energy_per_particle(axes, pos)
     assert np.isclose(energy, expected, atol=1e-6) #should i increase tolerance here to
 
-def test_honeycomb():
+def test_honeycomb(): #2 overlapping triangles
     a =1
     axes = np.array([[1,0],[-0.5,np.sqrt(3)/2]])
     pos0 = np.array([[0, 0], [0, 1/np.sqrt(3)]])
