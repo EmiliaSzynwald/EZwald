@@ -22,12 +22,12 @@ class Ewald:
 
   ### purpose in life
   def sum(self, pos, rvecs, kvecs):
-    vconst = self.constant(len(pos))
+    vconst = self.constant(len(pos)) #where did this constant come from??
     vsr = self.sum_sr(pos, rvecs) #real-space sum
     vlr = self.sum_lr(pos, kvecs) #reciprocal-space sum
     return vconst + vsr + vlr #total Ewald energy: constant + short-range + long-range
 
-  ### neutralizing background
+  ### neutralizing background 
   def vsr_k0(self): #short range
     dm1 = self.ndim-1
     denom = dm1*self.alpha**dm1*self.omega
