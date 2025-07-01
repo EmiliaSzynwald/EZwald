@@ -36,7 +36,7 @@ def test_rectangle():
         [0, b]
     ])
     pos = axes_pos.get_rvecs(axes, (nx, nx))
-    expected = -1.68092485
+    expected = -1.68092485 #expected value is different if its monolayer vs bilayer??
     energy = compute_energy_per_particle(axes, pos)
     assert np.isclose(energy, expected, atol=1e-6) 
 
