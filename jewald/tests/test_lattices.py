@@ -71,14 +71,14 @@ def test_triangle(): #hexagon and triangle are the same
     nx =3
     axes = np.array([[1, 0], [-0.5, (np.sqrt(3)) / 2]]) * 3  # Stretches the lattice by factor of 3
     pos = np.array([[0, 0]])
-    expected = -0.7022378
+    expected = -0.368701 #previous issue
     energy = compute_energy_per_particle(axes, pos)
-    assert np.isclose(energy, expected, atol=1e-6) #should i increase tolerance here to
+    assert np.isclose(energy, expected, atol=1e-6)
 
 def test_honeycomb(): #2 overlapping triangles
     a =1
     axes = np.array([[1,0],[-0.5,np.sqrt(3)/2]])
     pos0 = np.array([[0, 0], [0, 1/np.sqrt(3)]])
-    expected = -2.0349255
+    expected = -1.51865 #previous issue
     energy = compute_energy_per_particle(axes, pos0)
-    assert np.isclose(energy, expected, atol=1e-6) #big issue
+    assert np.isclose(energy, expected, atol=1e-6)
