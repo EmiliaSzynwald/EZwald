@@ -17,12 +17,12 @@ def alpha(rc, kc):
 class Ewald:
   def __init__(self, alpha, ndim, omega):
     self.alpha = alpha
-    self.ndim = ndim
-    self.omega = omega
+    self.ndim = ndim #number of row space dimensions (if = 2 then 2d)
+    self.omega = omega #cell volume 
 
   ### purpose in life
   def sum(self, pos, rvecs, kvecs):
-    vconst = self.constant(len(pos)) #where did this constant come from??
+    vconst = self.constant(len(pos)) 
     vsr = self.sum_sr(pos, rvecs) #real-space sum
     vlr = self.sum_lr(pos, kvecs) #reciprocal-space sum
     return vconst + vsr + vlr #total Ewald energy: constant + short-range + long-range
