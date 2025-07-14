@@ -10,12 +10,6 @@ from jewald import axes_pos, ewald, lattice
 # from . import axes_pos, lattice, ewald
 import matplotlib.pyplot as plt
 
-
-def compute_energy_per_particle(axes, pos):
-    ew, rvecs, kvecs = ewald.make_ewald(axes)
-    total_energy = ew.sum(pos, rvecs, kvecs)
-    return total_energy / len(pos)
-
 # From axes you get: ew, rvecs, kvecs Using: make_ewald(axes)
 # From pos, rvecs, kvecs you get: sum Using: ew.sum(pos, rvecs, kvecs)
 # need axes and pos to compute sum
@@ -55,7 +49,7 @@ print("PR calculated energy: ", sum_PR, "and expected", PRsum)
 ###Primitive Rectangle END
 
 
-###Centered Rectangle: off
+###Centered Rectangle: CORRECT
 lam = 0.95
 a2 = 1
 a1 = lam*a2
@@ -65,7 +59,7 @@ pos_CR = np.array([
 
 axes_CR = np.array([
     [a1,    0],
-    [a1/2,  a2]
+    [a1/2,  a2/2]
 ])
 
 ew, rvecs, kvecs = ewald.make_ewald(axes_CR)
