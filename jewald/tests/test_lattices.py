@@ -9,11 +9,15 @@ from jewald import axes_pos, ewald, lattice
 # pytest -v .
 
 def compute_energy_per_particle(axes, pos):
-    area = axes_pos.volume(axes)
-    rc, kc = lattice.compute_cutoffs(axes, 15.0)
-    latidx = lattice.lattice_indices(axes, rc, kc)
-    ew = ewald.Ewald(ewald.alpha(rc, kc), 2, area)
-    rvecs, kvecs = lattice.transform_lattice(latidx, axes)
+    # area = axes_pos.volume(axes)
+    # rc, kc = lattice.compute_cutoffs(axes, 15.0)
+    # latidx = lattice.lattice_indices(axes, rc, kc)
+    # ew = ewald.Ewald(ewald.alpha(rc, kc), 2, area)
+    # rvecs, kvecs = lattice.transform_lattice(latidx, axes)
+    # total_energy = ew.sum(pos, rvecs, kvecs)
+    # return total_energy / len(pos)
+    
+    ew, rvecs, kvecs = ewald.make_ewald(axes)
     total_energy = ew.sum(pos, rvecs, kvecs)
     return total_energy / len(pos)
 
