@@ -31,7 +31,7 @@ def test_Square(nx=2):
     # Build Ewald sum objects
     ew, rvecs, kvecs = ewald.make_ewald(axes)
     total_energy = ew.sum(pos, rvecs, kvecs)
-    energy_per_particle = total_energy / len(pos)
+    energy_per_particle = total_energy / nx**2
 
     # Analytical result from reference (for comparison)
     ac = axes_pos.volume(axes_primitive)
@@ -69,7 +69,7 @@ def test_PrimitiveRectangle(nx=2):
     # Build Ewald sum objects
     ew, rvecs, kvecs = ewald.make_ewald(axes)
     total_energy = ew.sum(pos, rvecs, kvecs)
-    energy_per_particle = total_energy / len(pos)
+    energy_per_particle = total_energy / nx**2
 
     # Analytical result from reference (for comparison)
     ac = axes_pos.volume(axes_primitive)
@@ -110,7 +110,7 @@ def test_CenteredRectangle(nx=2):
     # Build Ewald sum objects
     ew, rvecs, kvecs = ewald.make_ewald(axes)
     total_energy = ew.sum(pos, rvecs, kvecs)
-    energy_per_particle = total_energy / len(pos)
+    energy_per_particle = total_energy / nx**2
 
     # Analytical result from reference (for comparison)
     ac = axes_pos.volume(axes_primitive)
@@ -148,7 +148,7 @@ def test_Hexagon(nx=2):
     # Build Ewald sum objects
     ew, rvecs, kvecs = ewald.make_ewald(axes)
     total_energy = ew.sum(pos, rvecs, kvecs)
-    energy_per_particle = total_energy / len(pos)
+    energy_per_particle = total_energy / nx**2
 
     # Analytical result from reference (for comparison)
     ac = axes_pos.volume(axes_primitive)
