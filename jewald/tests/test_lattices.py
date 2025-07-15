@@ -151,7 +151,7 @@ def test_Hexagon(nx=2):
     energy_per_particle = total_energy / len(pos)
 
     # Analytical result from reference (for comparison)
-    ac = (np.sqrt(3) / 2) * nx**2  # Area of supercell
+    ac = abs(np.linalg.det(axes_primitive)) * nx**2  # Area of supercell
     expected = -3.921034 / (2 * ac**0.5)
 
     # Assert energy per particle remains consistent
