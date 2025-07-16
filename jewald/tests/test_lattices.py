@@ -35,7 +35,7 @@ def test_Square(nx=2):
 
     # Analytical result from reference (for comparison)
     ac = axes_pos.volume(axes_primitive)
-    expected = -3.900265 / (2 * ac ** 0.5)
+    expected = -3.900265 / ac**0.5
 
     # Assert energy per particle remains consistent
     assert np.isclose(energy_per_particle, expected, atol=1e-5)
