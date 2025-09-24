@@ -23,7 +23,7 @@ def test_staggered_square(d, expected):
     x = np.concatenate([_disp + x0 for _disp in disp])
     pos = x@cell
     charge = -1*jnp.ones(len(pos))
-    bew = EwaldSumSlab(cell, d)
+    bew = bilayer_sum.EwaldSumSlab(cell, d)
     E = bew.energy(charge, pos)/len(pos)
     n = (len(pos))/abs(np.linalg.det(cell))
     rs = 1 / (np.sqrt(np.pi*n))
@@ -51,7 +51,7 @@ def test_rectangular(d, expected):
     x = np.concatenate([_disp + x0 for _disp in disp])
     pos = x@cell
     charge = -1*jnp.ones(len(pos)) #This is e
-    bew = EwaldSumSlab(cell, d)
+    bew = bilayer_sum.EwaldSumSlab(cell, d)
     E = bew.energy(charge, pos)/len(pos)
     n = (len(pos))/abs(np.linalg.det(cell))
     rs = 1 / (np.sqrt(np.pi*n))
@@ -76,7 +76,7 @@ def test_staggered_hexagonal(d, expected):
     x = np.concatenate([_disp + x0 for _disp in disp])
     pos = x@cell
     charge = -1*jnp.ones(len(pos)) #This is e
-    bew = EwaldSumSlab(cell, d)
+    bew = bilayer_sum.EwaldSumSlab(cell, d)
     E = bew.energy(charge, pos)/len(pos)
     n = (len(pos))/abs(np.linalg.det(cell))
     rs = 1 / (np.sqrt(np.pi*n))
