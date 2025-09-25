@@ -1,11 +1,10 @@
 import numpy as np
-import jax
-import jax.numpy as jnp
-jax.config.update("jax_enable_x64", True)
 import pytest
-import sys, os
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+import jax.numpy as jnp
+import sys
+import os
 from jewald import bilayer_sum
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
 test_cases_staggered_square = [
     (0.2404040404040404, -1.575227519156419),
@@ -26,10 +25,7 @@ def test_staggered_square(d, expected):
     bew = bilayer_sum.EwaldSumSlab(cell, d)
     E = bew.energy(charge, pos)/len(pos)
     n = (len(pos))/abs(np.linalg.det(cell))
-    rs = 1 / (np.sqrt(np.pi*n))
-    eta = d/ (np.sqrt(2*np.pi* (rs**2)))
     energy_rescaling = E/(np.sqrt(n))
-
     assert np.isclose(energy_rescaling, expected, atol=1e-3)
 
 test_cases_rectangular = [
@@ -54,10 +50,7 @@ def test_rectangular(d, expected):
     bew = bilayer_sum.EwaldSumSlab(cell, d)
     E = bew.energy(charge, pos)/len(pos)
     n = (len(pos))/abs(np.linalg.det(cell))
-    rs = 1 / (np.sqrt(np.pi*n))
-    eta = d/ (np.sqrt(2*np.pi* (rs**2)))
     energy_rescaling = E/(np.sqrt(n))
-
     assert np.isclose(energy_rescaling, expected, atol=1e-3)
 
 test_cases_staggered_hexagonal = [
@@ -79,12 +72,5 @@ def test_staggered_hexagonal(d, expected):
     bew = bilayer_sum.EwaldSumSlab(cell, d)
     E = bew.energy(charge, pos)/len(pos)
     n = (len(pos))/abs(np.linalg.det(cell))
-    rs = 1 / (np.sqrt(np.pi*n))
-    eta = d/ (np.sqrt(2*np.pi* (rs**2)))
     energy_rescaling = E/(np.sqrt(n))
-
     assert np.isclose(energy_rescaling, expected, atol=1e-3)
-
-
-
-
