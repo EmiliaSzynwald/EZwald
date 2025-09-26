@@ -4,8 +4,6 @@ import jax
 jax.config.update("jax_enable_x64", True)
 import jax.numpy as jnp
 
-import numpy as np
-
 def displace_matrix(xa, xb, disp_fn=None):
     if disp_fn is None:
         return jnp.expand_dims(xa, -2) - jnp.expand_dims(xb, -3)
