@@ -4,72 +4,15 @@ import jax
 jax.config.update("jax_enable_x64", True)
 import jax.numpy as jnp
 
-def displace_matrix(xa, xb, disp_fn=None):
-    if disp_fn is None:
-        return jnp.expand_dims(xa, -2) - jnp.expand_dims(xb, -3)
-    else:
-        return jax.vmap(jax.vmap(disp_fn, (None, 0)), (0, None))(xa, xb)
+from .geometry import displace_matrix, gen_pbc_disp_fn, gen_lattice
 
-def determine_cell_type(latvec, ortho_tol=1e-10) -> str:
-    is_diagonal = jnp.all(jnp.abs(latvec - jnp.diag(jnp.diag(latvec))) < ortho_tol)
-    if is_diagonal:
-        return "diagonal"
-    is_orthogonal = jnp.all(jnp.abs(jnp.triu(latvec @ latvec.T, k=1)) < ortho_tol)
-    if is_orthogonal:
-        return "orthogonal"
-    return "general"
-
-def gen_pbc_disp_fn(latvec, mode="auto"):
-    latvec = jnp.asarray(latvec)
-    mode = mode.lower()
-    if mode == "auto":
-        ortho_tol = 1e-10
-        mode = determine_cell_type(latvec, ortho_tol=ortho_tol)
-    # diagonal cell
-    if mode.startswith("diag"):
-        latdiag = jnp.diagonal(latvec)
-
-        def diagonal_disp(xa, xb):
-            frac_disp = xa / latdiag - xb / latdiag
-            shifted_frac_disp = frac_disp - jnp.rint(frac_disp)
-            return shifted_frac_disp * latdiag
-
-        return diagonal_disp
-    # orthogonal cell
-    if mode.startswith("orth"):
-        invvec = jnp.linalg.inv(latvec)
-
-        def orthogonal_disp(xa, xb):
-            frac_disp = xa @ invvec - xb @ invvec
-            shifted_frac_disp = frac_disp - jnp.rint(frac_disp)
-            return shifted_frac_disp @ latvec
-
-        return orthogonal_disp
-    # general cell
-    if mode.startswith("gen"):
-        n_lat = 1
-        images = gen_lattice_displacements(latvec, n_lat)
-        invvec = jnp.linalg.inv(latvec)
-
-        def xpbc(x):  # wrap position into simulation cell
-            f = x @ invvec
-            return (f % 1) @ latvec
-
-        def monoclinic_disp(xa, xb):
-            disps = (xpbc(xa) - xpbc(xb))[None] + images
-            dists = jnp.linalg.norm(disps, axis=-1)
-            idx = jnp.argmin(dists)
-            return disps[idx]
-
-        return monoclinic_disp
-    # fail to recognize mode
-    raise ValueError(f"unknown mode for gen_pbc_disp_fn: {mode}")
 
 def gen_lattice_displacements(latvec, n_lat):
     n_d = latvec.shape[0]  # number of spatial dimension
     XYZ = jnp.meshgrid(*[jnp.arange(-n_lat, n_lat + 1)] * n_d, indexing="ij")
     xyz = jnp.stack(XYZ, axis=-1).reshape((-1, n_d))
     return jnp.dot(xyz, latvec)
+
 
 def gen_positive_gpoints(recvec, g_max):
     # Determine G points to include in reciprocal Ewald sum
@@ -87,6 +30,7 @@ def gen_positive_gpoints(recvec, g_max):
     gpoints = 2 * jnp.pi * gpts @ recvec
     return gpoints
 
+
 def calc_gweight(gpoints, cellvolume, alpha):
     if gpoints.shape[-1] == 2:
         gnorm = jnp.linalg.norm(gpoints, axis=-1)
@@ -97,6 +41,7 @@ def calc_gweight(gpoints, cellvolume, alpha):
             4 * jnp.pi / (cellvolume * gsquared) * jnp.exp(-gsquared / (4 * alpha**2))
         )
     return gweight
+
 
 def calc_gweight_interlayer(gpoints, cellvolume, alpha, hz):
     if gpoints.shape[-1] == 2:
@@ -113,6 +58,7 @@ def calc_gweight_interlayer(gpoints, cellvolume, alpha, hz):
         ) / 2.0
     return gweight
 
+
 class EwaldSumSlab:
     """
     Quasi-2D Ewald summation to calculate bi-layer Coulumb interaction
@@ -127,6 +73,7 @@ class EwaldSumSlab:
         g_max=200,
         g_threshold=1e-12,
         alpha=None,
+        disp_fn_mode='auto',
     ):
         """
         Initilization of the Ewald summation class by preparing
@@ -154,7 +101,7 @@ class EwaldSumSlab:
         # determine alpha
         self.alpha = self._guess_alpha(n_lat) if alpha is None else alpha
         # minimal image displacement function
-        self.disp_fn = gen_pbc_disp_fn(latvec)
+        self.disp_fn = gen_pbc_disp_fn(latvec, mode=disp_fn_mode)
         # lattice displacement to be added to disp in real space sum
         self.lattice_displacements, self.simg_const = self._prepare_lattice(n_lat)
         # g points to be used in reciprocal sum
@@ -170,9 +117,9 @@ class EwaldSumSlab:
         return 5.0 / smallest_height
 
     def _prepare_lattice(self, n_lat):
-        lattice_displacements = gen_lattice_displacements(self.latvec, n_lat)
-        lat_norm = jnp.linalg.norm(lattice_displacements, axis=-1)
-        lat_norm = lat_norm[lat_norm > 0]
+        #lattice_displacements = gen_lattice_displacements(self.latvec, n_lat)
+        lattice_displacements = gen_lattice(self.latvec, (2*n_lat+1,)*len(self.latvec))
+        lat_norm = jnp.linalg.norm(lattice_displacements[1:], axis=-1)  # skip 0
         simg_const = jnp.sum(jax.lax.erfc(self.alpha * lat_norm) / lat_norm)
         return lattice_displacements, simg_const
 
@@ -286,4 +233,3 @@ class EwaldSumSlab:
         )
         pos = jnp.concatenate([r, x], axis=0)
         return self.energy(charge, pos)
-
