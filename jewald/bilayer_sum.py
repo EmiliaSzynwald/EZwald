@@ -74,6 +74,7 @@ class EwaldSumSlab:
         g_threshold=1e-12,
         alpha=None,
         disp_fn_mode='auto',
+        gpoints=None,
     ):
         """
         Initilization of the Ewald summation class by preparing
@@ -105,9 +106,14 @@ class EwaldSumSlab:
         # lattice displacement to be added to disp in real space sum
         self.lattice_displacements, self.simg_const = self._prepare_lattice(n_lat)
         # g points to be used in reciprocal sum
-        self.gpoints, self.gweight, self.gweight_interlayer = self._prepare_gpoints(
-            g_max, g_threshold
-        )
+        if gpoints is None:
+            self.gpoints, self.gweight, self.gweight_interlayer = self._prepare_gpoints(
+                g_max, g_threshold
+            )
+        else:
+            self.gpoints = gpoints
+            self.gweight = calc_gweight(gpoints, self.cellvolume, self.alpha)
+            self.gweight_interlayer = calc_gweight_interlayer(gpoints, self.cellvolume, self.alpha, self.hz)
 
     def _guess_alpha(self, n_lat):
         # The smallest height of the cell, from reciprocal vectors
@@ -179,9 +185,10 @@ class EwaldSumSlab:
 
     def intralayer_recip_part(self, charge, pos):
         g_dot_r = self.gpoints @ pos.T  # [n_gpoints, n_particle]
-        sfactor = jnp.exp(1j * g_dot_r) @ charge  # [n_gpoints,]
-        e_recip = self.gweight @ (sfactor * sfactor.conj())
-        return e_recip.real
+        rhok = jnp.exp(1j * g_dot_r) @ charge  # [n_gpoints,]
+        sofk = (rhok * rhok.conj()).real
+        e_recip = self.gweight @ sofk
+        return e_recip
 
     def interlayer_real_part(self, charge_t, pos_t, charge_b, pos_b):
         # if charge_t.shape[0] < 2:
@@ -197,12 +204,13 @@ class EwaldSumSlab:
 
     def interlayer_recip_part(self, charge_t, pos_t, charge_b, pos_b):
         g_dot_r_t = self.gpoints @ pos_t.T  # [n_gpoints, n_particle]
-        sfactor_t = jnp.exp(1j * g_dot_r_t) @ charge_t  # [n_gpoints,]
+        rhok_t = jnp.exp(1j * g_dot_r_t) @ charge_t  # [n_gpoints,]
         g_dot_r_b = self.gpoints @ pos_b.T  # [n_gpoints, n_particle]
-        sfactor_b = jnp.exp(1j * g_dot_r_b) @ charge_b  # [n_gpoints,]
+        rhok_b = jnp.exp(1j * g_dot_r_b) @ charge_b  # [n_gpoints,]
+        sofk = (rhok_t * rhok_b.conj()).real
         """here 2* because there is no double counting"""
-        e_recip = 2 * self.gweight_interlayer @ (sfactor_t * sfactor_b.conj())
-        return e_recip.real
+        e_recip = 2 * self.gweight_interlayer @ sofk
+        return e_recip
 
     def energy(self, charge, pos):
         charge_t, charge_b = jnp.split(charge, 2)

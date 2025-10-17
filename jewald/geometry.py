@@ -8,6 +8,10 @@ def calc_recvec(latvec):
     return 2*jnp.pi*jnp.linalg.inv(latvec).T
 
 
+def calc_volume(latvec):
+    return jnp.abs(jnp.linalg.det(latvec))
+
+
 def gen_ticks(mesh: Sequence[int], kspace:bool=True):
     """Generate ticks to discretize space"""
     if kspace:
