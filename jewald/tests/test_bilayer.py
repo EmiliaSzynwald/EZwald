@@ -29,7 +29,7 @@ def test_staggered_square(d, expected):
     assert np.isclose(energy_rescaling, expected, atol=1e-3)
 
 @pytest.mark.parametrize("d, expected", test_cases_staggered_square) #####################################
-def test_tile_staggered_square(d, expected, nx):
+def test_tile_staggered_square(d, expected, nx=2):
     #Tile test
     alat = 1
     reg_cell = 2 * np.array([[alat, 0], [0, alat]])
@@ -68,7 +68,7 @@ def test_rectangular(d, expected):
     assert np.isclose(energy_rescaling, expected, atol=1e-3)
 
 @pytest.mark.parametrize("d, expected", test_cases_rectangular) ########################################
-def test_tile_rectangular(d, expected, nx):
+def test_tile_rectangular(d, expected, nx=2):
     #Tile test
     alat = 1
     reg_cell = 2 * np.array([
@@ -107,7 +107,7 @@ def test_staggered_hexagonal(d, expected):
     assert np.isclose(energy_rescaling, expected, atol=1e-3)
 
 @pytest.mark.parametrize("d, expected", test_cases_staggered_hexagonal) ########################################
-def test_tile_staggered_hexagonal(d, expected, nx):
+def test_tile_staggered_hexagonal(d, expected, nx=2):
     #Tile test
     alat = np.sqrt(2*np.pi/np.sqrt(3))
     reg_cell = 2 * np.array([[alat,0],[-0.5*alat,np.sqrt(3)/2*alat]])
