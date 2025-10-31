@@ -3,8 +3,16 @@ import pytest
 import jax.numpy as jnp
 import sys
 import os
-from jewald import bilayer_sum
+from jewald import bilayer_sum, geometry
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+
+def tile(pos, mesht, cell):
+    ndim = len(cell)
+    #cell1 = np.diag(mesht) @ cell
+    rvecs = gen_lattice(cell, mesht, kspace=False)
+    all_pos = rvecs[:, None] + pos[None, :]
+    pos1 = all_pos.reshape(-1, ndim)
+    return pos1
 
 test_cases_staggered_square = [
     (0.2404040404040404, -1.575227519156419),
