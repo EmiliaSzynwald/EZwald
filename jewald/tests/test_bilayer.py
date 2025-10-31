@@ -28,6 +28,20 @@ def test_staggered_square(d, expected):
     energy_rescaling = E/(np.sqrt(n))
     assert np.isclose(energy_rescaling, expected, atol=1e-3)
 
+@pytest.mark.parametrize("d, expected", test_cases_staggered_square) #####################################
+def test_tile_staggered_square(d, expected, nx):
+    #Tile test
+    alat = 1
+    reg_cell = 2 * np.array([[alat, 0], [0, alat]])
+    cell = np.diag( (nx, nx) ) @ reg_cell
+    pos = tile(pos, (nx, nx), cell) #pos of nx x nx supercell
+    charge = -1*jnp.ones(len(pos))
+    bew = bilayer_sum.EwaldSumSlab(cell, d)
+    E = bew.energy(charge, pos)/len(pos)
+    n = (len(pos))/abs(np.linalg.det(cell))
+    energy_rescaling = E/(np.sqrt(n))
+    assert np.isclose(energy_rescaling, expected, atol=1e-3) #################################################
+
 test_cases_rectangular = [
     (0.0, -1.9605157893210492),
     (0.20555555555555557, -1.6755085482438778),
@@ -53,6 +67,23 @@ def test_rectangular(d, expected):
     energy_rescaling = E/(np.sqrt(n))
     assert np.isclose(energy_rescaling, expected, atol=1e-3)
 
+@pytest.mark.parametrize("d, expected", test_cases_rectangular) ########################################
+def test_tile_rectangular(d, expected, nx):
+    #Tile test
+    alat = 1
+    reg_cell = 2 * np.array([
+        [alat, 0],
+        [0, np.sqrt(3) * alat]
+    ])
+    cell = np.diag( (nx, nx) ) @ reg_cell
+    pos = tile(pos, (nx, nx), cell) 
+    charge = -1*jnp.ones(len(pos))
+    bew = bilayer_sum.EwaldSumSlab(cell, d)
+    E = bew.energy(charge, pos)/len(pos)
+    n = (len(pos))/abs(np.linalg.det(cell))
+    energy_rescaling = E/(np.sqrt(n))
+    assert np.isclose(energy_rescaling, expected, atol=1e-3) ##############################################
+
 test_cases_staggered_hexagonal = [
     (0.6060606060606061, -1.469355465180093),
     (0.7575757575757576, -1.435466086946966),
@@ -74,3 +105,17 @@ def test_staggered_hexagonal(d, expected):
     n = (len(pos))/abs(np.linalg.det(cell))
     energy_rescaling = E/(np.sqrt(n))
     assert np.isclose(energy_rescaling, expected, atol=1e-3)
+
+@pytest.mark.parametrize("d, expected", test_cases_staggered_hexagonal) ########################################
+def test_tile_staggered_hexagonal(d, expected, nx):
+    #Tile test
+    alat = np.sqrt(2*np.pi/np.sqrt(3))
+    reg_cell = 2 * np.array([[alat,0],[-0.5*alat,np.sqrt(3)/2*alat]])
+    cell = np.diag( (nx, nx) ) @ reg_cell
+    pos = tile(pos, (nx, nx), cell) 
+    charge = -1*jnp.ones(len(pos))
+    bew = bilayer_sum.EwaldSumSlab(cell, d)
+    E = bew.energy(charge, pos)/len(pos)
+    n = (len(pos))/abs(np.linalg.det(cell))
+    energy_rescaling = E/(np.sqrt(n))
+    assert np.isclose(energy_rescaling, expected, atol=1e-3) ##############################################
