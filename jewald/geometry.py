@@ -89,6 +89,13 @@ def gen_ksphere(
             sel = sel & ~((kvecs[:, l-1]==0) & (kvecs[:, l] < 0))
     return kvecs[sel]
 
+def tile(pos, mesht, cell):
+    ndim = len(cell)
+    #cell1 = np.diag(mesht) @ cell
+    rvecs = gen_lattice(cell, mesht, kspace=False)
+    all_pos = rvecs[:, None] + pos[None, :]
+    pos1 = all_pos.reshape(-1, ndim)
+    return pos1
 
 ##### Minimum Image Convention #####
 
