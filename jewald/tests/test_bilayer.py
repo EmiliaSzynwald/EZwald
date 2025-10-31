@@ -41,8 +41,14 @@ def test_tile_staggered_square(d, expected, nx=2):
     #Tile test
     alat = 1
     reg_cell = 2 * np.array([[alat, 0], [0, alat]])
+    disp=np.array([[0,0],[0.5, 0.5]]) /2
+    x0 = np.array([[0,0],[0.5,0],[0,0.5],[0.5,0.5]])
+    x = np.concatenate([_disp + x0 for _disp in disp])
+    reg_pos = x@reg_cell
+
     cell = np.diag( (nx, nx) ) @ reg_cell
-    pos = tile(pos, (nx, nx), cell) #pos of nx x nx supercell
+    pos = tile(reg_pos, (nx, nx), cell) #pos of nx x nx supercell
+
     charge = -1*jnp.ones(len(pos))
     bew = bilayer_sum.EwaldSumSlab(cell, d)
     E = bew.energy(charge, pos)/len(pos)
@@ -83,8 +89,13 @@ def test_tile_rectangular(d, expected, nx=2):
         [alat, 0],
         [0, np.sqrt(3) * alat]
     ])
+    disp = np.array([[0,0],[0.5, 0.5]]) /2
+    x0 = np.array([[0,0],[0.5,0],[0,0.5],[0.5,0.5]])
+    x = np.concatenate([_disp + x0 for _disp in disp])
+    reg_pos = x@cell
+    
     cell = np.diag( (nx, nx) ) @ reg_cell
-    pos = tile(pos, (nx, nx), cell) 
+    pos = tile(reg_pos, (nx, nx), cell) 
     charge = -1*jnp.ones(len(pos))
     bew = bilayer_sum.EwaldSumSlab(cell, d)
     E = bew.energy(charge, pos)/len(pos)
@@ -119,8 +130,13 @@ def test_tile_staggered_hexagonal(d, expected, nx=2):
     #Tile test
     alat = np.sqrt(2*np.pi/np.sqrt(3))
     reg_cell = 2 * np.array([[alat,0],[-0.5*alat,np.sqrt(3)/2*alat]])
+    disp=np.array([[0,0],[2./3,1./3]]) /2
+    x0 = np.array([[0,0],[0.5,0],[0,0.5],[0.5,0.5]])
+    x = np.concatenate([_disp + x0 for _disp in disp])
+    reg_pos = x@cell
+    
     cell = np.diag( (nx, nx) ) @ reg_cell
-    pos = tile(pos, (nx, nx), cell) 
+    pos = tile(reg_pos, (nx, nx), cell) 
     charge = -1*jnp.ones(len(pos))
     bew = bilayer_sum.EwaldSumSlab(cell, d)
     E = bew.energy(charge, pos)/len(pos)
