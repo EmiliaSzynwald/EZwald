@@ -147,7 +147,7 @@ class EwaldSumSlab:
     def const_part(self, charge):
         dm1 = self.latvec.shape[-1] - 1
         q2_sum = jnp.sum(charge**2)
-        charge_t, charge_b = jnp.split(charge, 2)
+        charge_t, charge_b = jnp.array_split(charge, 2)
         e_self = -self.alpha / jnp.sqrt(jnp.pi) * q2_sum
         denom = dm1 * self.cellvolume * self.alpha**dm1
         e_charged_k0 = 0.0
@@ -213,8 +213,8 @@ class EwaldSumSlab:
         return e_recip
 
     def energy(self, charge, pos):
-        charge_t, charge_b = jnp.split(charge, 2)
-        pos_t, pos_b = jnp.split(pos, 2)
+        charge_t, charge_b = jnp.array_split(charge, 2)
+        pos_t, pos_b = jnp.array_split(pos, 2)
         """Calculation the Coulomb energy from point charges and their positions"""
         return (
             sum(self.const_part(charge))
