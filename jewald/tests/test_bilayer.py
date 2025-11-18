@@ -40,7 +40,7 @@ def test_tile_staggered_square(d, expected, nx=2):
     x = np.concatenate([_disp + x0 for _disp in disp])
     reg_pos = x@reg_cell
 
-    reg_pos_t, reg_pos_b = np.split(reg_pos,2) 
+    reg_pos_t, reg_pos_b = np.array_split(reg_pos,2) 
 
     cell = np.diag( (nx, nx) ) @ reg_cell
     pos_t = geo.tile(reg_pos_t, (nx, nx), reg_cell) #pos of nx x nx supercell
@@ -93,7 +93,7 @@ def test_tile_rectangular(d, expected, nx=2):
     x = np.concatenate([_disp + x0 for _disp in disp])
     reg_pos = x@reg_cell
 
-    reg_pos_t, reg_pos_b = np.split(reg_pos,2) 
+    reg_pos_t, reg_pos_b = np.array_split(reg_pos,2) 
 
     cell = np.diag( (nx, nx) ) @ reg_cell
     pos_t = geo.tile(reg_pos_t, (nx, nx), reg_cell) #pos of nx x nx supercell
@@ -140,7 +140,7 @@ def test_tile_staggered_hexagonal(d, expected, nx=2):
     x = np.concatenate([_disp + x0 for _disp in disp])
     reg_pos = x@reg_cell
 
-    reg_pos_t, reg_pos_b = np.split(reg_pos,2) 
+    reg_pos_t, reg_pos_b = np.array_split(reg_pos,2) 
 
     cell = np.diag( (nx, nx) ) @ reg_cell
     pos_t = geo.tile(reg_pos_t, (nx, nx), reg_cell) #pos of nx x nx supercell
