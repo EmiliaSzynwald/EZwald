@@ -1,4 +1,4 @@
- """Lattice generation utilities for Ewald summation.
+"""Lattice generation utilities for Ewald summation.
 
 This module provides functions for generating lattice vectors in both direct
 and reciprocal space, computing cutoffs, and transforming between Miller
