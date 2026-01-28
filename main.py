@@ -1,8 +1,20 @@
 #!/usr/bin/env python3
+"""Main script for crystal structure optimization using Ewald summation.
+
+This script performs geometry optimization of 2D crystal structures by minimizing
+the Coulomb energy computed via Ewald summation. It supports optimization of
+both lattice parameters and atomic positions.
+"""
 import numpy as np
 from time import time
 
 def main():
+  """Main function for crystal structure optimization.
+
+  Performs gradient-based optimization of crystal structures using Ewald summation
+  to compute Coulomb energies. Supports various command-line arguments for
+  controlling optimization parameters.
+  """
   from argparse import ArgumentParser
   parser = ArgumentParser()
   parser.add_argument('--seed', type=int, default=52)
@@ -37,6 +49,15 @@ def main():
 
   area = axes_pos.volume(axes)
   def make_cell(theta, area):
+    """Create a 2D unit cell from angle with fixed area.
+
+    Args:
+      theta (float): Angle between lattice vectors in radians.
+      area (float): Fixed area of the unit cell.
+
+    Returns:
+      jnp.array: Lattice vectors in row-major format. Shape (2, 2).
+    """
     # fixed-volume lattice from angle
     a = (area/jnp.sin(theta))**0.5
     axes = a*jnp.array([
@@ -49,6 +70,16 @@ def main():
 
   @jax.jit
   def loss(params):
+    """Compute the Ewald energy for given parameters.
+
+    Args:
+      params (tuple): A tuple containing:
+          - theta (float): Lattice angle in radians.
+          - pos (jnp.ndarray): Particle positions. Shape (N, 2).
+
+    Returns:
+      float: Total Ewald energy.
+    """
     theta, pos = params
     axes = make_cell(theta, area)
     rvecs, kvecs = lattice.transform_lattice(latidx, axes)
@@ -95,8 +126,26 @@ def main():
   )
 
   def fit(params, optimizer):
+    """Perform gradient-based optimization of crystal structure.
+
+    Args:
+      params (tuple): Initial parameters (theta, pos).
+      optimizer (optax.GradientTransformation): Optax optimizer.
+
+    Returns:
+      tuple: Optimized parameters (theta, pos).
+    """
     @jax.jit
     def step(params, opt_state):
+      """Single optimization step.
+
+      Args:
+        params (tuple): Current parameters.
+        opt_state: Optimizer state.
+
+      Returns:
+        tuple: Updated parameters, optimizer state, and loss value.
+      """
       loss_value, grads = grad_fn(params)
       updates, opt_state = optimizer.update(grads, opt_state, params)
       params = optax.apply_updates(params, updates)

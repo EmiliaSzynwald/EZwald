@@ -1,8 +1,22 @@
+"""Visualization utilities for crystal structures.
+
+This module provides functions for visualizing crystal structures, including
+drawing unit cells and plotting atomic positions.
+"""
 #!/usr/bin/env python3
 import numpy as np
 import matplotlib.pyplot as plt
 
 def set_default_cell_styles(kwargs):
+  """Set default styling options for cell visualization.
+
+  Modifies the kwargs dictionary in-place to add default values for color,
+  alpha, and linewidth if not already specified.
+
+  Args:
+    kwargs (dict): Dictionary of matplotlib plotting keyword arguments.
+        Modified in-place.
+  """
   if not (('c' in kwargs) or ('color' in kwargs)):
     kwargs['c'] = 'gray'
   if ('alpha' not in kwargs):
@@ -69,6 +83,11 @@ def draw_cell(ax, axes, corner=None, enclose=True, **kwargs):
   return cell
 
 def main():
+  """Main visualization function.
+
+  Loads and displays crystal structures before and after optimization,
+    reading from 'axes0.dat', 'pos0.dat', 'axes1.dat', and 'pos1.dat'.
+  """
   fig = plt.figure()
 
   axl = []

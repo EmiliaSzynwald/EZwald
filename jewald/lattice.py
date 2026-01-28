@@ -1,15 +1,26 @@
+ """Lattice generation utilities for Ewald summation.
+
+This module provides functions for generating lattice vectors in both direct
+and reciprocal space, computing cutoffs, and transforming between Miller
+indices and coordinate representations.
+"""
 import jax.numpy as jnp
 from jewald import axes_pos
 
 def make_lattice(axes, rckc):
   """Create crystal lattice in direct and reciprocal spaces.
 
+  Generates lattice vectors for both real-space and reciprocal-space Ewald
+  summation based on the unit cell and cutoff parameters.
+
   Args:
-    axes (np.array): lattice vectors in row-major
-    rckc (float): rcut*kcut
-  Return:
-    np.array: rvecs, direct-space lattice
-    np.array: kvecs, reciprocal-space lattice
+    axes (jnp.array): Lattice vectors in row-major format. Shape (ndim, ndim).
+    rckc (float): Product of real-space and reciprocal-space cutoffs.
+
+  Returns:
+    tuple: A tuple containing:
+        - rvecs (jnp.array): Direct-space lattice vectors. Shape (M_r, ndim).
+        - kvecs (jnp.array): Reciprocal-space lattice vectors. Shape (M_k, ndim).
   """
   rc, kc = compute_cutoffs(axes, rckc)
   latidx = lattice_indices(axes, rc, kc)
@@ -17,29 +28,41 @@ def make_lattice(axes, rckc):
   return rvecs, kvecs
 
 def compute_cutoffs(axes, rckc):
-  """Compute periodic image cutoffs.
+  """Compute periodic image cutoffs for Ewald summation.
+
+  Determines appropriate real-space and reciprocal-space cutoffs based on
+  the Wigner-Seitz cell radius and the product rckc.
 
   Args:
-    axes (np.array): lattice vectors in row-major
-    rckc (float): rcut*kcut
-  Return:
-    float: rcut, real-space cutoff
-    float: kcut, reciprocal-space cutoff
+    axes (jnp.array): Lattice vectors in row-major format. Shape (ndim, ndim).
+    rckc (float): Product of real-space and reciprocal-space cutoffs.
+
+  Returns:
+    tuple: A tuple containing:
+        - rc (float): Real-space cutoff distance.
+        - kc (float): Reciprocal-space cutoff magnitude.
   """
   rc = axes_pos.rwsc(axes)
   kc = rckc/rc
   return rc, kc
 
 def lattice_indices(axes, rc, kc):
-  """Initialize Miller indices.
+  """Generate Miller indices for real-space and reciprocal-space lattices.
+
+  Creates integer lattice indices (Miller indices) for both direct and
+  reciprocal space that fall within the specified cutoffs.
 
   Args:
-    axes (np.array): lattice vectors in row-major
-    rc (float): real-space cutoff
-    kc (float): reciprocal-space cutoff
-  Return:
-    np.array: lvecs, real-space lattice indices
-    np.array: gvecs, reciprocal-space lattice indices
+    axes (jnp.array): Lattice vectors in row-major format. Shape (ndim, ndim).
+    rc (float): Real-space cutoff distance.
+    kc (float): Reciprocal-space cutoff magnitude.
+
+  Returns:
+    tuple: A tuple containing:
+        - lvecs (jnp.array): Real-space lattice indices (Miller indices).
+            Shape (M_r, ndim).
+        - gvecs (jnp.array): Reciprocal-space lattice indices (Miller indices).
+            Shape (M_k, ndim).
   """
   # real-space Miller indices
   rmax = rc + 2*rc  # box size is ~ 2*rc
@@ -52,14 +75,22 @@ def lattice_indices(axes, rc, kc):
   return lvecs, gvecs
 
 def transform_lattice(latidx, axes):
-  """Transform integer indices to coordinates
+  """Transform integer Miller indices to coordinate vectors.
+
+  Converts Miller indices (integer lattice coordinates) to actual coordinate
+  vectors in both direct and reciprocal space.
 
   Args:
-    latidx (tuple): lattice indices (lvecs, gvecs)
-    axes (jnp.array): lattice vectors in row-major
-  Return:
-    jnp.array: rvecs, direct-space lattice
-    jnp.array: kvecs, reciprocal-space lattice
+    latidx (tuple): A tuple containing:
+        - lvecs (jnp.array): Real-space Miller indices. Shape (M_r, ndim).
+        - gvecs (jnp.array): Reciprocal-space Miller indices. Shape (M_k, ndim).
+    axes (jnp.array): Direct lattice vectors in row-major format.
+        Shape (ndim, ndim).
+
+  Returns:
+    tuple: A tuple containing:
+        - rvecs (jnp.array): Direct-space lattice vectors. Shape (M_r, ndim).
+        - kvecs (jnp.array): Reciprocal-space lattice vectors. Shape (M_k, ndim).
   """
   lvecs, gvecs = latidx
   raxes = 2*jnp.pi*jnp.linalg.inv(axes).T
