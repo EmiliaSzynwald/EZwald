@@ -5,6 +5,7 @@ jax.config.update("jax_enable_x64", True)
 import jax.numpy as jnp
 
 from . import geometry as geo
+from . import sofk
 
 def gen_positive_gpoints(recvec, g_max):
     # Determine G points to include in reciprocal Ewald sum
@@ -164,8 +165,6 @@ class EwaldSumSlab:
         return e_self, e_charged_k0
 
     def intralayer_real_part(self, charge, pos):
-        # if charge.shape[0] < 2:
-        #     return 0
         disp = geo.displace_matrix(pos, pos, disp_fn=self.disp_fn)
         rvec = disp[None, :, :, :] + self.lattice_displacements[:, None, None, :]
         r = jnp.linalg.norm(rvec + jnp.eye(pos.shape[0])[..., None], axis=-1)
@@ -175,17 +174,11 @@ class EwaldSumSlab:
         return e_real
 
     def intralayer_recip_part(self, charge, pos):
-        g_dot_r = self.gpoints @ pos.T  # [n_gpoints, n_particle]
-        rhok = jnp.exp(1j * g_dot_r) @ charge  # [n_gpoints,]
-        sofk = (rhok * rhok.conj()).real
-        e_recip = self.gweight @ sofk
+        sofk_val = sofk.structure_factor(self.gpoints, pos, charge)
+        e_recip = self.gweight @ sofk_val
         return e_recip
 
     def interlayer_real_part(self, charge_t, pos_t, charge_b, pos_b):
-        # if charge_t.shape[0] < 2:
-        #     return 0
-        # if charge_b.shape[0] < 2:
-        #     return 0
         disp = geo.displace_matrix(pos_t, pos_b, disp_fn=self.disp_fn)
         rvec = disp[None, :, :, :] + self.lattice_displacements[:, None, None, :]
         r = (jnp.linalg.norm(rvec, axis=-1) ** 2 + self.hz**2) ** 0.5

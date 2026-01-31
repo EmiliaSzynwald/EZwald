@@ -30,7 +30,8 @@ def test_Square(nx=2):
 
     # Build Ewald sum objects
     ew, rvecs, kvecs = ewald.make_ewald(axes)
-    total_energy = ew.sum(pos, rvecs, kvecs)
+    charge = -np.ones(len(pos))
+    total_energy = ew.sum(pos, charge, rvecs, kvecs)
     energy_per_particle = total_energy / nx**2
 
     # Analytical result from reference (for comparison)
@@ -68,7 +69,8 @@ def test_PrimitiveRectangle(nx=2):
 
     # Build Ewald sum objects
     ew, rvecs, kvecs = ewald.make_ewald(axes)
-    total_energy = ew.sum(pos, rvecs, kvecs)
+    charge = -np.ones(len(pos))
+    total_energy = ew.sum(pos, charge, rvecs, kvecs)
     energy_per_particle = total_energy / nx**2
 
     # Analytical result from reference (for comparison)
@@ -109,7 +111,8 @@ def test_CenteredRectangle(nx=2):
 
     # Build Ewald sum objects
     ew, rvecs, kvecs = ewald.make_ewald(axes)
-    total_energy = ew.sum(pos, rvecs, kvecs)
+    charge = -np.ones(len(pos))
+    total_energy = ew.sum(pos, charge, rvecs, kvecs)
     energy_per_particle = total_energy / nx**2
 
     # Analytical result from reference (for comparison)
@@ -147,7 +150,8 @@ def test_Hexagon(nx=2):
 
     # Build Ewald sum objects
     ew, rvecs, kvecs = ewald.make_ewald(axes)
-    total_energy = ew.sum(pos, rvecs, kvecs)
+    charge = -np.ones(len(pos))
+    total_energy = ew.sum(pos, charge, rvecs, kvecs)
     energy_per_particle = total_energy / nx**2
 
     # Analytical result from reference (for comparison)

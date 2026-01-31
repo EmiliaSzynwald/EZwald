@@ -21,10 +21,10 @@ class Ewald:
     self.omega = omega #cell volume 
 
   ### purpose in life
-  def sum(self, pos, rvecs, kvecs):
-    vconst = self.constant(len(pos)) 
-    vsr = self.sum_sr(pos, rvecs) #real-space sum
-    vlr = self.sum_lr(pos, kvecs) #reciprocal-space sum
+  def sum(self, pos, charge, rvecs, kvecs):
+    vconst = self.constant(charge)
+    vsr = self.sum_sr(pos, charge, rvecs) #real-space sum
+    vlr = self.sum_lr(pos, charge, kvecs) #reciprocal-space sum
     return vconst + vsr + vlr #total Ewald energy: constant + short-range + long-range
 
   ### neutralizing background 
@@ -36,29 +36,32 @@ class Ewald:
   def vlr_r0(self): #long range
     return 2*self.alpha/jnp.pi**0.5
 
-  def constant(self, npart):
+  def constant(self, charge):
     vsr_k0 = self.vsr_k0()
     vlr_r0 = self.vlr_r0()
-    ebg = -0.5*npart*(npart-1)*vsr_k0
-    vconst = -0.5*npart*(vlr_r0+vsr_k0)+ebg
+    q2_sum = jnp.sum(charge**2)
+    q_sum_sq = jnp.sum(charge)**2
+    ebg = - 0.5 * q_sum_sq * vsr_k0
+    vconst = -0.5 * q2_sum * vlr_r0 + ebg
     return vconst
 
   ### direct-space sum
   def fvsr_r(self, r): #Short-range (real-space) pair potential
     return erfc(self.alpha*r)/r
 
-  def sum_sr(self, pos, rvecs): #Compute the real-space (short-range) sum over all unique particle pairs and lattice shifts
+  def sum_sr(self, pos, charge, rvecs): #Compute the real-space (short-range) sum over all unique particle pairs and lattice shifts
     esr = 0.0
     npart = len(pos)
     if npart == 1:
       return esr
     idx = jnp.triu_indices(npart, k=1)
+    q_pairs = charge[idx[0]] * charge[idx[1]]
     shifts = rvecs
     esrl = []
     for shift in shifts:
       drij = (pos[:, None] - (pos+shift)[None, :])[idx]
       rij = jnp.linalg.norm(drij, axis=-1)
-      esr1 = self.fvsr_r(rij).sum()
+      esr1 = (self.fvsr_r(rij) * q_pairs).sum()
       esrl.append(esr1)
     esr = jnp.sum(jnp.array(esrl))
     return esr
@@ -76,9 +79,9 @@ class Ewald:
     vk = 2*dm1*jnp.pi/k**dm1/self.omega
     return vk*jnp.exp(-ak**2)
 
-  def sum_lr(self, pos, kvecs): #Compute the reciprocal-space (long-range) sum using the structure factor
+  def sum_lr(self, pos, charge, kvecs): #Compute the reciprocal-space (long-range) sum using the structure factor
     kmags = jnp.linalg.norm(kvecs, axis=-1)
     vlr_k = self.fvlr_k2d(kmags) if self.ndim == 2 else self.fvlr_k3d(kmags)
-    sk = sofk.structure_factor(kvecs, pos)
+    sk = sofk.structure_factor(kvecs, pos, charge)
     elr = 0.5*jnp.dot(sk, vlr_k)
     return elr
