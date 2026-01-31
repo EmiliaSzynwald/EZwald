@@ -4,7 +4,7 @@ import jax
 import pytest
 import sys, os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
-from jewald import axes_pos, ewald, lattice, geometry
+from jewald import ewald, lattice, geometry as geo
 
 def test_Square(nx=2):
     """Test Ewald sum energy per particle for nx x nx tiled square supercells.
@@ -26,7 +26,9 @@ def test_Square(nx=2):
     axes = nx * axes_primitive
 
     # Generate grid of lattice sites for supercell
-    pos = axes_pos.get_rvecs(axes, (nx, nx))
+    # pos = axes_pos.get_rvecs(axes, (nx, nx))
+    latvec = axes / np.array((nx, nx))[:, None]
+    pos = geo.gen_lattice(latvec, (nx, nx), kspace=False)
 
     # Build Ewald sum objects
     ew, rvecs, kvecs = ewald.make_ewald(axes)
@@ -35,7 +37,7 @@ def test_Square(nx=2):
     energy_per_particle = total_energy / nx**2
 
     # Analytical result from reference (for comparison)
-    ac = geometry.calc_volume(axes_primitive)
+    ac = geo.calc_volume(axes_primitive)
     expected = -3.900265 / (2 * ac ** 0.5)
 
     # Assert energy per particle remains consistent
@@ -65,7 +67,9 @@ def test_PrimitiveRectangle(nx=2):
     axes = nx * axes_primitive
 
     # Generate grid of lattice sites for supercell
-    pos = axes_pos.get_rvecs(axes, (nx, nx))
+    # pos = axes_pos.get_rvecs(axes, (nx, nx))
+    latvec = axes / np.array((nx, nx))[:, None]
+    pos = geo.gen_lattice(latvec, (nx, nx), kspace=False)
 
     # Build Ewald sum objects
     ew, rvecs, kvecs = ewald.make_ewald(axes)
@@ -74,7 +78,7 @@ def test_PrimitiveRectangle(nx=2):
     energy_per_particle = total_energy / nx**2
 
     # Analytical result from reference (for comparison)
-    ac = geometry.calc_volume(axes_primitive)
+    ac = geo.calc_volume(axes_primitive)
     expected = -3.898597 / (2 * (a1 * a2) ** 0.5)
 
     # Assert energy per particle remains consistent
@@ -107,7 +111,9 @@ def test_CenteredRectangle(nx=2):
     axes = nx * axes_primitive
 
     # Generate grid of lattice sites for supercell
-    pos = axes_pos.get_rvecs(axes, (nx, nx))
+    # pos = axes_pos.get_rvecs(axes, (nx, nx))
+    latvec = axes / np.array((nx, nx))[:, None]
+    pos = geo.gen_lattice(latvec, (nx, nx), kspace=False)
 
     # Build Ewald sum objects
     ew, rvecs, kvecs = ewald.make_ewald(axes)
@@ -116,7 +122,7 @@ def test_CenteredRectangle(nx=2):
     energy_per_particle = total_energy / nx**2
 
     # Analytical result from reference (for comparison)
-    ac = geometry.calc_volume(axes_primitive)
+    ac = geo.calc_volume(axes_primitive)
     expected = -3.900647 / (2 * ac ** 0.5)
 
     # Assert energy per particle remains consistent
@@ -146,7 +152,9 @@ def test_Hexagon(nx=2):
     axes = nx * axes_primitive
 
     # Generate grid of lattice sites for supercell
-    pos = axes_pos.get_rvecs(axes, (nx, nx))
+    # pos = axes_pos.get_rvecs(axes, (nx, nx))
+    latvec = axes / np.array((nx, nx))[:, None]
+    pos = geo.gen_lattice(latvec, (nx, nx), kspace=False)
 
     # Build Ewald sum objects
     ew, rvecs, kvecs = ewald.make_ewald(axes)
@@ -155,7 +163,7 @@ def test_Hexagon(nx=2):
     energy_per_particle = total_energy / nx**2
 
     # Analytical result from reference (for comparison)
-    ac = geometry.calc_volume(axes_primitive)
+    ac = geo.calc_volume(axes_primitive)
     expected = -3.921034 / (2 * ac**0.5)
 
     # Assert energy per particle remains consistent

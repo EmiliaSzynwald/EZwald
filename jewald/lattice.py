@@ -1,5 +1,5 @@
 import jax.numpy as jnp
-from jewald import axes_pos, geometry
+from jewald import geometry as geo
 
 def make_lattice(axes, rckc):
   """Create crystal lattice in direct and reciprocal spaces.
@@ -26,7 +26,7 @@ def compute_cutoffs(axes, rckc):
     float: rcut, real-space cutoff
     float: kcut, reciprocal-space cutoff
   """
-  rc = geometry.calc_rwsc(axes)
+  rc = geo.calc_rwsc(axes)
   kc = rckc/rc
   return rc, kc
 
@@ -43,12 +43,12 @@ def lattice_indices(axes, rc, kc):
   """
   # real-space Miller indices
   rmax = rc + 2*rc  # box size is ~ 2*rc
-  rvecs = axes_pos.get_ksphere(axes, rmax)
-  lvecs = axes_pos.get_nvecs(axes, rvecs)
+  rvecs = geo.get_ksphere(axes, rmax)
+  lvecs = geo.get_nvecs(axes, rvecs)
   # reciprocal-space Miller indices
-  raxes = geometry.calc_recvec(axes)
-  kvecs = axes_pos.get_ksphere(raxes, kc)[1:]
-  gvecs = axes_pos.get_nvecs(raxes, kvecs)
+  raxes = geo.calc_recvec(axes)
+  kvecs = geo.get_ksphere(raxes, kc)[1:]
+  gvecs = geo.get_nvecs(raxes, kvecs)
   return lvecs, gvecs
 
 def transform_lattice(latidx, axes):
@@ -62,7 +62,7 @@ def transform_lattice(latidx, axes):
     jnp.array: kvecs, reciprocal-space lattice
   """
   lvecs, gvecs = latidx
-  raxes = geometry.calc_recvec(axes)
+  raxes = geo.calc_recvec(axes)
   rvecs = jnp.dot(lvecs, axes)
   kvecs = jnp.dot(gvecs, raxes)
   return rvecs, kvecs

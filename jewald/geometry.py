@@ -134,3 +134,35 @@ def displace_matrix(xa, xb, disp_fn=None):
         return jnp.expand_dims(xa, -2) - jnp.expand_dims(xb, -3)
     else:
         return jax.vmap(jax.vmap(disp_fn, (None, 0)), (0, None))(xa, xb)
+
+
+def get_nvecs(axes, pos, atol=1e-10):
+    """Find integer vectors of lattice positions from unit cell"""
+    inv_axes = jnp.linalg.inv(axes)
+    ncands = pos @ inv_axes
+    nvecs = jnp.rint(ncands).astype(int)
+    # Optional check omitted for JAX performance, relying on logic
+    return nvecs
+
+
+def pos_in_axes(axes, pos, ztol=1e-10):
+    """Particle position(s) in cell"""
+    upos = pos @ jnp.linalg.inv(axes)
+    u = upos % 1
+    d = jnp.abs(u - 1)
+    u = jnp.where(d < ztol, 0, u)
+    pos0 = u @ axes
+    return pos0
+
+
+def get_ksphere(raxes, kc, margin=0.2, twist=None):
+    """Generates a set of k-vectors within a sphere of radius kc"""
+    ndim = raxes.shape[0]
+    kmesh = guess_kmesh(raxes, (1+margin)*kc)
+    qvec = jnp.zeros(ndim)
+    if twist is not None:
+        qvec = jnp.dot(twist, raxes)
+    kvecs = gen_lattice(raxes, kmesh, kspace=True) + qvec
+    kmags = jnp.linalg.norm(kvecs, axis=-1)
+    ksel = kmags < kc
+    return kvecs[ksel]

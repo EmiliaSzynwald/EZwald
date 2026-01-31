@@ -22,7 +22,7 @@ def main():
     os.environ['JAX_PLATFORM_NAME'] = 'cpu'
   import jax
   import jax.numpy as jnp
-  from jewald import axes_pos, ewald, lattice, geometry
+  from jewald import ewald, lattice, geometry as geo
   print(jax.devices())
   rng = np.random.default_rng(args.seed)
 
@@ -30,11 +30,13 @@ def main():
   axes = nx*np.eye(ndim)
   rc, kc = lattice.compute_cutoffs(axes, args.rckc)
   latidx = lattice.lattice_indices(axes, rc, kc)
-  pos = axes_pos.get_rvecs(axes, (nx,)*ndim)
+  mesh = (nx,)*ndim
+  latvec = axes / np.array(mesh)[:, None]
+  pos = geo.gen_lattice(latvec, mesh, kspace=False)
   print('N=',len(pos))
   charge = -jnp.ones(len(pos))
 
-  area = geometry.calc_volume(axes)
+  area = geo.calc_volume(axes)
   def make_cell(theta, area):
     # fixed-volume lattice from angle
     a = (area/jnp.sin(theta))**0.5
@@ -58,7 +60,9 @@ def main():
   # ideal triangular crystal
   theta = 120./180*np.pi
   axes = make_cell(theta, area)
-  pos = axes_pos.get_rvecs(axes, (nx,)*ndim)
+  mesh = (nx,)*ndim
+  latvec = axes / np.array(mesh)[:, None]
+  pos = geo.gen_lattice(latvec, mesh, kspace=False)
   params = (theta, pos)
 
   if args.verbose:
@@ -125,7 +129,7 @@ def main():
   theta1, pos1 = params1
   axes1 = make_cell(theta1, area)
   np.savetxt('axes1.dat', axes1)
-  np.savetxt('pos1.dat', axes_pos.pos_in_axes(axes1, pos1))
+  np.savetxt('pos1.dat', geo.pos_in_axes(axes1, pos1))
   print('optimized theta = %.1f' % (theta1/np.pi*180))
 
 if __name__ == '__main__':
