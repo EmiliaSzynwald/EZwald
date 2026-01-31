@@ -1,5 +1,5 @@
 import jax.numpy as jnp
-from jewald import axes_pos
+from jewald import axes_pos, geometry
 
 def make_lattice(axes, rckc):
   """Create crystal lattice in direct and reciprocal spaces.
@@ -46,7 +46,7 @@ def lattice_indices(axes, rc, kc):
   rvecs = axes_pos.get_ksphere(axes, rmax)
   lvecs = axes_pos.get_nvecs(axes, rvecs)
   # reciprocal-space Miller indices
-  raxes = axes_pos.raxes(axes)
+  raxes = geometry.calc_recvec(axes)
   kvecs = axes_pos.get_ksphere(raxes, kc)[1:]
   gvecs = axes_pos.get_nvecs(raxes, kvecs)
   return lvecs, gvecs

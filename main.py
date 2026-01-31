@@ -20,11 +20,11 @@ def main():
   import os
   if not args.gpu:
     os.environ['JAX_PLATFORM_NAME'] = 'cpu'
-  from jax.config import config
-  config.update("jax_enable_x64", True)
+  import jax
+  jax.config.update("jax_enable_x64", True)
   import jax
   import jax.numpy as jnp
-  from jewald import axes_pos, ewald, lattice
+  from jewald import axes_pos, ewald, lattice, geometry
   print(jax.devices())
   rng = np.random.default_rng(args.seed)
 
@@ -35,7 +35,7 @@ def main():
   pos = axes_pos.get_rvecs(axes, (nx,)*ndim)
   print('N=',len(pos))
 
-  area = axes_pos.volume(axes)
+  area = geometry.calc_volume(axes)
   def make_cell(theta, area):
     # fixed-volume lattice from angle
     a = (area/jnp.sin(theta))**0.5

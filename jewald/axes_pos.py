@@ -1,26 +1,6 @@
 # use no jax in this file
 import numpy as np
 
-def volume(axes):
-  """ volume of a simulation cell
-
-  Args:
-    axes (np.array): lattice vectors in row-major
-  Returns:
-    float: volume of cell, returns the absolute value of the determinant of the lattice vectors.
-  """
-  return np.abs(np.linalg.det(axes))
-
-def raxes(axes):
-  """ find reciprocal lattice vectors
-
-  Args:
-    axes (np.array): lattice vectors in row-major
-  Returns:
-    np.array: Reciprocal lattice vectors in row-major format. Calculated as 2*pi times the inverse transpose of the direct lattice vectors.
-  """
-  return 2*np.pi*np.linalg.inv(axes).T
-
 def rwsc(axes, dn=1):
   """ radius of the inscribed sphere inside the real-space
   Wigner-Seitz cell of the given cell
