@@ -4,7 +4,7 @@ import jax
 jax.config.update("jax_enable_x64", True)
 import jax.numpy as jnp
 
-from .geometry import displace_matrix, gen_pbc_disp_fn, gen_lattice
+from . import geometry as geo
 
 def gen_positive_gpoints(recvec, g_max):
     # Determine G points to include in reciprocal Ewald sum
@@ -19,7 +19,7 @@ def gen_positive_gpoints(recvec, g_max):
     gpts = jnp.concatenate(
         [jnp.stack(g, axis=-1).reshape(-1, n_d) for g in gpts_list], axis=0
     )
-    gpoints = 2 * jnp.pi * gpts @ recvec
+    gpoints = gpts @ recvec
     return gpoints
 
 
@@ -75,7 +75,7 @@ class EwaldSumSlab:
         Args:
             latvec (Array): 3x3 matrix with each row a lattice vector
             hz: positive float value of layer displacement
-            attractive: True means interlayer interaction is attractive, default repulsive
+            attractive (bool): True means interlayer interaction is attractive, default is False.
             n_lat (int): How far to take real-space sum; probably never needs to be changed.
             g_max (int): How far to take reciprocal sum; probably never needs to be changed.
             g_threshold (float): ignore g points below this value. Following DeepSolid value.
@@ -84,17 +84,16 @@ class EwaldSumSlab:
         if hz < 0:
             raise ValueError("hz must be positive")
         self.hz = hz
-        self.attractive = attractive
         self.chargefactor = 1.0
         if attractive:
             self.chargefactor = -1.0
 
-        self.recvec = jnp.linalg.inv(latvec).T
-        self.cellvolume = jnp.abs(jnp.linalg.det(latvec))
+        self.recvec = geo.calc_recvec(latvec)
+        self.cellvolume = geo.calc_volume(latvec)
         # determine alpha
         self.alpha = self._guess_alpha(n_lat) if alpha is None else alpha
         # minimal image displacement function
-        self.disp_fn = gen_pbc_disp_fn(latvec, mode=disp_fn_mode)
+        self.disp_fn = geo.gen_pbc_disp_fn(latvec, mode=disp_fn_mode)
         # lattice displacement to be added to disp in real space sum
         self.lattice_displacements, self.simg_const = self._prepare_lattice(n_lat)
         # g points to be used in reciprocal sum
@@ -109,14 +108,14 @@ class EwaldSumSlab:
 
     def _guess_alpha(self, n_lat):
         # The smallest height of the cell, from reciprocal vectors
-        smallest_height = jnp.min(1 / jnp.linalg.norm(self.recvec, axis=1))
+        smallest_height = jnp.min(2 * jnp.pi / jnp.linalg.norm(self.recvec, axis=1))
         # rescale accrording to n_lat
         smallest_height *= (2 * n_lat + 1) / 3  # devide by 3 here to keep default
         return 5.0 / smallest_height
 
     def _prepare_lattice(self, n_lat):
 
-        lattice_displacements = gen_lattice(self.latvec, (2*n_lat+1,)*len(self.latvec))
+        lattice_displacements = geo.gen_lattice(self.latvec, (2*n_lat+1,)*len(self.latvec))
         lat_norm = jnp.linalg.norm(lattice_displacements[1:], axis=-1)  # skip 0
         simg_const = jnp.sum(jax.lax.erfc(self.alpha * lat_norm) / lat_norm)
         return lattice_displacements, simg_const
@@ -167,7 +166,7 @@ class EwaldSumSlab:
     def intralayer_real_part(self, charge, pos):
         # if charge.shape[0] < 2:
         #     return 0
-        disp = displace_matrix(pos, pos, disp_fn=self.disp_fn)
+        disp = geo.displace_matrix(pos, pos, disp_fn=self.disp_fn)
         rvec = disp[None, :, :, :] + self.lattice_displacements[:, None, None, :]
         r = jnp.linalg.norm(rvec + jnp.eye(pos.shape[0])[..., None], axis=-1)
         charge_ij = charge[:, None] * charge[None, :]
@@ -187,7 +186,7 @@ class EwaldSumSlab:
         #     return 0
         # if charge_b.shape[0] < 2:
         #     return 0
-        disp = displace_matrix(pos_t, pos_b, disp_fn=self.disp_fn)
+        disp = geo.displace_matrix(pos_t, pos_b, disp_fn=self.disp_fn)
         rvec = disp[None, :, :, :] + self.lattice_displacements[:, None, None, :]
         r = (jnp.linalg.norm(rvec, axis=-1) ** 2 + self.hz**2) ** 0.5
         charge_ij = charge_t[:, None] * charge_b[None, :]

@@ -62,7 +62,7 @@ def transform_lattice(latidx, axes):
     jnp.array: kvecs, reciprocal-space lattice
   """
   lvecs, gvecs = latidx
-  raxes = 2*jnp.pi*jnp.linalg.inv(axes).T
+  raxes = geometry.calc_recvec(axes)
   rvecs = jnp.dot(lvecs, axes)
   kvecs = jnp.dot(gvecs, raxes)
   return rvecs, kvecs
