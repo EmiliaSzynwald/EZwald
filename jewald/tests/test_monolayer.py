@@ -1,8 +1,5 @@
 import numpy as np
-
-import sys
-import os
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+import jax.numpy as jnp
 from jewald import ewald, geometry as geo
 
 def test_Square(nx=2):
@@ -31,7 +28,7 @@ def test_Square(nx=2):
 
     # Build Ewald sum objects
     ew, rvecs, kvecs = ewald.make_ewald(axes)
-    charge = -np.ones(len(pos))
+    charge = -jnp.ones(len(pos))
     total_energy = ew.sum(pos, charge, rvecs, kvecs)
     energy_per_particle = total_energy / nx**2
 
@@ -72,7 +69,7 @@ def test_PrimitiveRectangle(nx=2):
 
     # Build Ewald sum objects
     ew, rvecs, kvecs = ewald.make_ewald(axes)
-    charge = -np.ones(len(pos))
+    charge = -jnp.ones(len(pos))
     total_energy = ew.sum(pos, charge, rvecs, kvecs)
     energy_per_particle = total_energy / nx**2
 
@@ -115,7 +112,7 @@ def test_CenteredRectangle(nx=2):
 
     # Build Ewald sum objects
     ew, rvecs, kvecs = ewald.make_ewald(axes)
-    charge = -np.ones(len(pos))
+    charge = -jnp.ones(len(pos))
     total_energy = ew.sum(pos, charge, rvecs, kvecs)
     energy_per_particle = total_energy / nx**2
 
@@ -156,7 +153,7 @@ def test_Hexagon(nx=2):
 
     # Build Ewald sum objects
     ew, rvecs, kvecs = ewald.make_ewald(axes)
-    charge = -np.ones(len(pos))
+    charge = -jnp.ones(len(pos))
     total_energy = ew.sum(pos, charge, rvecs, kvecs)
     energy_per_particle = total_energy / nx**2
 
