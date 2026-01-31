@@ -1,9 +1,5 @@
-import os
-
 import jax
-
 import jax.numpy as jnp
-
 from . import geometry as geo
 from . import sofk
 

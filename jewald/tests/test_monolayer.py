@@ -1,10 +1,9 @@
 import numpy as np
-import jax
 
-import pytest
-import sys, os
+import sys
+import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
-from jewald import ewald, lattice, geometry as geo
+from jewald import ewald, geometry as geo
 
 def test_Square(nx=2):
     """Test Ewald sum energy per particle for nx x nx tiled square supercells.
@@ -78,7 +77,6 @@ def test_PrimitiveRectangle(nx=2):
     energy_per_particle = total_energy / nx**2
 
     # Analytical result from reference (for comparison)
-    ac = geo.calc_volume(axes_primitive)
     expected = -3.898597 / (2 * (a1 * a2) ** 0.5)
 
     # Assert energy per particle remains consistent
