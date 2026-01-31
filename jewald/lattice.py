@@ -26,7 +26,7 @@ def compute_cutoffs(axes, rckc):
     float: rcut, real-space cutoff
     float: kcut, reciprocal-space cutoff
   """
-  rc = axes_pos.rwsc(axes)
+  rc = geometry.calc_rwsc(axes)
   kc = rckc/rc
   return rc, kc
 

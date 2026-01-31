@@ -66,28 +66,6 @@ def guess_kmesh(recvec, kcut: float) -> Sequence[int]:
     return kmesh
 
 
-def gen_ksphere(
-    cell,
-    k_cut: float,
-    twist: Sequence[float] = None,
-    margin: float = 0.2,
-    positive: bool = False,
-):
-    recvec = calc_recvec(cell)
-    qvec = jnp.zeros(len(cell))
-    if twist is not None:
-        twist = (jnp.asarray(twist) + 0.5) % 1. - 0.5
-        qvec = twist @ recvec
-    mesh = guess_kmesh(recvec, (1 + margin) * k_cut)
-    kvecs = qvec + gen_kvecs(recvec, mesh)
-    kmags = jnp.linalg.norm(kvecs, axis=-1)
-    sel = kmags < k_cut
-    if positive:
-        sel = sel & (kvecs[:, 0] >= 0)
-        ndim = len(cell)
-        for l in range(1, ndim):
-            sel = sel & ~((kvecs[:, l-1]==0) & (kvecs[:, l] < 0))
-    return kvecs[sel]
 
 def tile(pos, mesht, cell):
     ndim = len(cell)
@@ -156,16 +134,3 @@ def displace_matrix(xa, xb, disp_fn=None):
         return jnp.expand_dims(xa, -2) - jnp.expand_dims(xb, -3)
     else:
         return jax.vmap(jax.vmap(disp_fn, (None, 0)), (0, None))(xa, xb)
-
-def pdist(x, disp_fn=None):
-    # x is assumed to have dimension [..., n, 3]
-    n = x.shape[-2]
-    disp = displace_matrix(x, x, disp_fn)
-    disp_padded = disp + jnp.eye(n)[..., None]
-    dist = jnp.linalg.norm(disp_padded, axis=-1) * (1 - jnp.eye(n))
-    return dist
-
-def cdist(xa, xb, disp_fn=None):
-    disp = displace_matrix(xa, xb, disp_fn)
-    dist = jnp.linalg.norm(disp, axis=-1)
-    return dist

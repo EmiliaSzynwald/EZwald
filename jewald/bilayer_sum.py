@@ -6,14 +6,6 @@ import jax.numpy as jnp
 
 from .geometry import displace_matrix, gen_pbc_disp_fn, gen_lattice
 
-
-def gen_lattice_displacements(latvec, n_lat):
-    n_d = latvec.shape[0]  # number of spatial dimension
-    XYZ = jnp.meshgrid(*[jnp.arange(-n_lat, n_lat + 1)] * n_d, indexing="ij")
-    xyz = jnp.stack(XYZ, axis=-1).reshape((-1, n_d))
-    return jnp.dot(xyz, latvec)
-
-
 def gen_positive_gpoints(recvec, g_max):
     # Determine G points to include in reciprocal Ewald sum
     n_d = recvec.shape[0]  # number of spatial dimension
@@ -123,7 +115,7 @@ class EwaldSumSlab:
         return 5.0 / smallest_height
 
     def _prepare_lattice(self, n_lat):
-        #lattice_displacements = gen_lattice_displacements(self.latvec, n_lat)
+
         lattice_displacements = gen_lattice(self.latvec, (2*n_lat+1,)*len(self.latvec))
         lat_norm = jnp.linalg.norm(lattice_displacements[1:], axis=-1)  # skip 0
         simg_const = jnp.sum(jax.lax.erfc(self.alpha * lat_norm) / lat_norm)

@@ -1,28 +1,7 @@
 # use no jax in this file
 import numpy as np
 
-def rwsc(axes, dn=1):
-  """ radius of the inscribed sphere inside the real-space
-  Wigner-Seitz cell of the given cell
 
-  Args:
-    axes (np.array): lattice vectors in row-major
-    dn (int,optional): number of image cells to search in each
-     dimension, default dn=1 searches 26 images in 3D. Increasing `dn` increases accuracy but also computational cost.
-  Returns:
-    float: Wigner-Seitz cell radius. Approximated by finding the minimum distance to neighboring image cells and halving it.
-  """
-  ndim = len(axes)
-  from itertools import product
-  r2imgl  = []  # keep a list of distance^2 to all neighboring images
-  images = product(range(-dn, dn+1), repeat=ndim)
-  for ushift in images:
-    if sum(ushift) == 0:
-      continue  # ignore self
-    shift = np.dot(ushift, axes)
-    r2imgl.append(np.dot(shift, shift))
-  rimg = np.sqrt(min(r2imgl))
-  return rimg/2.
 
 def cubic_pos(spaces):
   """
