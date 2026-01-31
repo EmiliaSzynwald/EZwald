@@ -21,8 +21,6 @@ def main():
   if not args.gpu:
     os.environ['JAX_PLATFORM_NAME'] = 'cpu'
   import jax
-  jax.config.update("jax_enable_x64", True)
-  import jax
   import jax.numpy as jnp
   from jewald import axes_pos, ewald, lattice, geometry
   print(jax.devices())
@@ -34,6 +32,7 @@ def main():
   latidx = lattice.lattice_indices(axes, rc, kc)
   pos = axes_pos.get_rvecs(axes, (nx,)*ndim)
   print('N=',len(pos))
+  charge = -jnp.ones(len(pos))
 
   area = geometry.calc_volume(axes)
   def make_cell(theta, area):
@@ -52,7 +51,7 @@ def main():
     theta, pos = params
     axes = make_cell(theta, area)
     rvecs, kvecs = lattice.transform_lattice(latidx, axes)
-    return ew.sum(pos, rvecs, kvecs)
+    return ew.sum(pos, charge, rvecs, kvecs)
 
   grad_fn = jax.jit(jax.value_and_grad(loss))
 

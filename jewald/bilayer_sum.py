@@ -1,7 +1,7 @@
 import os
-os.environ['JAX_PLATFORMS'] = 'cpu'
+
 import jax
-jax.config.update("jax_enable_x64", True)
+
 import jax.numpy as jnp
 
 from . import geometry as geo

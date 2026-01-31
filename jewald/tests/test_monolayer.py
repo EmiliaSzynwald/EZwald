@@ -1,6 +1,6 @@
 import numpy as np
 import jax
-jax.config.update("jax_enable_x64", True)
+
 import pytest
 import sys, os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))

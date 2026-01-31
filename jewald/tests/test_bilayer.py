@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 import os
-os.environ['JAX_PLATFORMS'] = 'cpu'
+
 import jax.numpy as jnp
 import sys
 from jewald import bilayer_sum
