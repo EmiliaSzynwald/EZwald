@@ -300,7 +300,7 @@ class EwaldSumSlab:
         e_recip = 2 * self.gweight_interlayer @ sofk
         return e_recip
 
-    def energy(self, charge, posn, np =len(posn)/2, nd =len(posn)-n_up):
+    def energy(self, charge, posn, np = None, nd = None):
         """Total Coulomb energy for the bilayer (all terms).
 
         Args:
@@ -310,8 +310,13 @@ class EwaldSumSlab:
         Returns:
             float. Total slab Ewald Coulomb energy.
         """
+        if np is None:
+             np = len(posn) // 2
+        if nd is None:
+            nd = len(posn) - np
         n_up = np
         n_down = nd
+
         charge_t, charge_b = jnp.split(charge, [n_up])
         pos_t, pos_b = jnp.split(pos, [n_up])
         return (
