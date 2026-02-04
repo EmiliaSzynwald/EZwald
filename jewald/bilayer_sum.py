@@ -318,7 +318,7 @@ class EwaldSumSlab:
         n_down = nd
 
         charge_t, charge_b = jnp.split(charge, [n_up])
-        pos_t, pos_b = jnp.split(pos, [n_up])
+        pos_t, pos_b = jnp.split(posn, [n_up])
         return (
             sum(self.const_part(charge))
             + self.intralayer_real_part(charge_t, pos_t)
