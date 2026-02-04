@@ -83,8 +83,8 @@ def test_tile_staggered_square(d, expected, nx=2):
     pos = np.concatenate([pos_t, pos_b], axis=0)
 
     charge = -1*jnp.ones(len(pos))
-    bew = bilayer_sum.EwaldSumSlab(cell, d, n_up, n_down)
-    E = bew.energy(charge, pos, n_up, n_down)/len(pos)
+    bew = bilayer_sum.EwaldSumSlab(cell, d)
+    E = bew.energy(charge, pos)/len(pos)
     n = (len(pos))/abs(np.linalg.det(cell))
     energy_rescaling = E/(np.sqrt(n))
     assert np.isclose(energy_rescaling, expected, atol=1e-3)
