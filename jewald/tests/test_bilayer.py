@@ -71,8 +71,8 @@ def test_tile_staggered_square(d, expected, nx=2):
     x = np.concatenate([_disp + x0 for _disp in disp])
     reg_pos = x@reg_cell
 
-    n_up = len(reg_pos)/2
-    n_down = len(reg_pos) - n_up
+    n_up = int(len(reg_pos)/2)
+    n_down = int(len(reg_pos) - n_up)
 
     reg_pos_t, reg_pos_b = np.split(reg_pos, [n_up])
 
@@ -152,8 +152,8 @@ def test_tile_rectangular(d, expected, nx=2):
     x = np.concatenate([_disp + x0 for _disp in disp])
     reg_pos = x@reg_cell
 
-    n_up = len(reg_pos)/2
-    n_down = len(reg_pos) - n_up
+    n_up = int(len(reg_pos)/2)
+    n_down = int(len(reg_pos) - n_up)
 
     reg_pos_t, reg_pos_b = np.split(reg_pos, [n_up])
 
@@ -227,8 +227,8 @@ def test_tile_staggered_hexagonal(d, expected, nx=2):
     x = np.concatenate([_disp + x0 for _disp in disp])
     reg_pos = x@reg_cell
 
-    n_up = len(reg_pos)/2
-    n_down = len(reg_pos) - n_up
+    n_up = int(len(reg_pos)/2)
+    n_down = int(len(reg_pos) - n_up)
 
     reg_pos_t, reg_pos_b = np.split(reg_pos, [n_up])
 

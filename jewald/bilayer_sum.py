@@ -314,8 +314,8 @@ class EwaldSumSlab:
              np = len(posn) // 2
         if nd is None:
             nd = len(posn) - np
-        n_up = np
-        n_down = nd
+        n_up = int(np)
+        n_down = int(nd)
 
         charge_t, charge_b = jnp.split(charge, [n_up])
         pos_t, pos_b = jnp.split(posn, [n_up])
