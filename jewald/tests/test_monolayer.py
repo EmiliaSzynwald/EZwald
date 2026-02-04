@@ -1,6 +1,13 @@
+"""Monolayer Ewald tests: square, rectangular, centered-rectangle, and hexagonal lattices.
+
+Compares Ewald sum energies per particle to analytical references from
+'Some static and dynamical properties of a two-dimensional Wigner crystal'.
+"""
+
 import numpy as np
 import jax.numpy as jnp
 from jewald import ewald, geometry as geo
+
 
 def test_Square(nx=2):
     """Test Ewald sum energy per particle for nx x nx tiled square supercells.
@@ -11,7 +18,7 @@ def test_Square(nx=2):
 
     Args:
         nx (int): Tiling factor along x and y directions (default is 2).
-    
+
     The function compares the computed result to the reference value within an absolute
     tolerance of 1e-5.
     """
@@ -132,8 +139,8 @@ def test_Hexagon(nx=2):
     'Some static and dynamical properties of a two-dimensional Wigner crystal'.
 
     Args:
-        nx (int): Tiling factor along x and y directions (default is 3).
-    
+        nx (int): Tiling factor along x and y directions (default is 2).
+
     The function compares the computed result to the reference value within an absolute
     tolerance of 1e-6.
     """

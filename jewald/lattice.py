@@ -1,15 +1,24 @@
+"""Lattice generation for Ewald summation.
+
+This module builds real-space and reciprocal-space lattice vectors
+from cell axes and cutoffs, used by the Ewald module to perform
+the real- and reciprocal-space sums.
+"""
+
 import jax.numpy as jnp
 from jewald import geometry as geo
+
 
 def make_lattice(axes, rckc):
   """Create crystal lattice in direct and reciprocal spaces.
 
   Args:
-    axes (np.array): lattice vectors in row-major
-    rckc (float): rcut*kcut
-  Return:
-    np.array: rvecs, direct-space lattice
-    np.array: kvecs, reciprocal-space lattice
+    axes: Array of shape (ndim, ndim). Lattice vectors in row-major form.
+    rckc: float. Product of real-space and reciprocal-space cutoffs.
+
+  Returns:
+    rvecs: Array. Direct-space lattice displacement vectors.
+    kvecs: Array. Reciprocal-space vectors (excluding k=0).
   """
   rc, kc = compute_cutoffs(axes, rckc)
   latidx = lattice_indices(axes, rc, kc)
@@ -17,29 +26,31 @@ def make_lattice(axes, rckc):
   return rvecs, kvecs
 
 def compute_cutoffs(axes, rckc):
-  """Compute periodic image cutoffs.
+  """Compute real- and reciprocal-space cutoffs from rckc and cell.
 
   Args:
-    axes (np.array): lattice vectors in row-major
-    rckc (float): rcut*kcut
-  Return:
-    float: rcut, real-space cutoff
-    float: kcut, reciprocal-space cutoff
+    axes: Array of shape (ndim, ndim). Lattice vectors in row-major form.
+    rckc: float. Product rcut * kcut (controls Ewald convergence).
+
+  Returns:
+    rc: float. Real-space cutoff (inscribing radius of Wigner-Seitz cell).
+    kc: float. Reciprocal-space cutoff magnitude.
   """
   rc = geo.calc_rwsc(axes)
   kc = rckc/rc
   return rc, kc
 
 def lattice_indices(axes, rc, kc):
-  """Initialize Miller indices.
+  """Build integer lattice indices for real- and reciprocal-space sums.
 
   Args:
-    axes (np.array): lattice vectors in row-major
-    rc (float): real-space cutoff
-    kc (float): reciprocal-space cutoff
-  Return:
-    np.array: lvecs, real-space lattice indices
-    np.array: gvecs, reciprocal-space lattice indices
+    axes: Array of shape (ndim, ndim). Lattice vectors in row-major form.
+    rc: float. Real-space cutoff.
+    kc: float. Reciprocal-space cutoff magnitude.
+
+  Returns:
+    lvecs: Array. Integer indices for direct-space lattice points.
+    gvecs: Array. Integer indices for reciprocal-space vectors (excluding 0).
   """
   # real-space Miller indices
   rmax = rc + 2*rc  # box size is ~ 2*rc
@@ -52,14 +63,16 @@ def lattice_indices(axes, rc, kc):
   return lvecs, gvecs
 
 def transform_lattice(latidx, axes):
-  """Transform integer indices to coordinates
+  """Transform integer lattice indices to Cartesian coordinates.
 
   Args:
-    latidx (tuple): lattice indices (lvecs, gvecs)
-    axes (jnp.array): lattice vectors in row-major
-  Return:
-    jnp.array: rvecs, direct-space lattice
-    jnp.array: kvecs, reciprocal-space lattice
+    latidx: Tuple (lvecs, gvecs). Integer Miller indices for real and
+        reciprocal space.
+    axes: Array of shape (ndim, ndim). Lattice vectors in row-major form.
+
+  Returns:
+    rvecs: Array. Direct-space lattice vectors in Cartesian coordinates.
+    kvecs: Array. Reciprocal-space vectors in Cartesian coordinates.
   """
   lvecs, gvecs = latidx
   raxes = geo.calc_recvec(axes)

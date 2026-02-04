@@ -1,8 +1,23 @@
 #!/usr/bin/env python3
+"""Demo: Ewald geometry optimization for a 2D Wigner crystal.
+
+Minimizes the Coulomb energy of point charges in a 2D periodic cell with
+respect to the cell angle (and optionally positions). Uses JAX for
+differentiation and optax for optimization. Run with --verbose for
+timing; --gpu to use GPU if available.
+"""
+
 import numpy as np
 from time import time
 
+
 def main():
+  """Parse arguments, build Ewald setup, and run geometry optimization.
+
+  Creates a 2D triangular lattice, builds Ewald + lattice, and minimizes
+  total Coulomb energy w.r.t. cell angle (and positions if randomized).
+  Saves axes and positions before/after to axes0.dat, pos0.dat, axes1.dat, pos1.dat.
+  """
   from argparse import ArgumentParser
   parser = ArgumentParser()
   parser.add_argument('--seed', type=int, default=52)

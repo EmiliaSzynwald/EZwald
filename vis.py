@@ -1,8 +1,23 @@
 #!/usr/bin/env python3
+"""Visualization: draw periodic cells and particle positions.
+
+Loads axes and positions from axes0.dat, pos0.dat, axes1.dat, pos1.dat
+(typically produced by main.py) and draws the unit cell and particles
+before and after optimization.
+"""
+
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 def set_default_cell_styles(kwargs):
+  """Set default line style for cell edges (gray, semi-transparent, linewidth 2).
+
+  Modifies kwargs in place; only sets keys that are not already present.
+
+  Args:
+    kwargs: dict. Keyword arguments for plotting (e.g. for plt.plot).
+  """
   if not (('c' in kwargs) or ('color' in kwargs)):
     kwargs['c'] = 'gray'
   if ('alpha' not in kwargs):
@@ -10,27 +25,28 @@ def set_default_cell_styles(kwargs):
   if not (('lw' in kwargs) or ('linewidth' in kwargs)):
     kwargs['lw'] = 2
 
+
 def draw_cell(ax, axes, corner=None, enclose=True, **kwargs):
-  """ draw cell on ax
-  see example in draw_crystal
+  """Draw the unit cell (lattice vectors and optionally full enclosure) on ax.
 
   Args:
-    ax (plt.Axes): matplotlib Axes object, must have projection='3d'
-    axes (np.array): lattice vectors in row-major 3x3 array
-    corner (np.array,optional): lower left corner of the lattice
-      ,use (0,0,0) by default
-    enclose (bool): enclose the cell with lattice vectors
-      ,default is True. If False, then draw lattice vectors only
-    kwargs (dict,optional): keyword arguments passed to plt.plot
+    ax: matplotlib Axes. Must support 2D or 3D (e.g. projection='3d' for 3D).
+    axes: Array of shape (ndim, ndim). Lattice vectors in row-major (rows = a, b, c).
+    corner: Optional array of shape (ndim,). Origin for drawing; default (0,...,0).
+    enclose: bool. If True, draw all edges to enclose the cell; if False, only
+        the lattice vectors from corner. Default True.
+    **kwargs: Keyword arguments passed to plt.plot (color, linewidth, etc.).
+
   Returns:
-    list: a list of plt.Line3D or Line, one for each lattice vector
+    list. List of plot artists (e.g. Line2D/Line3D) for each drawn segment.
+
   Example:
-    >>> # draw 2D rectangular box, centered around (0, 0)
-    >>> box = np.array([3.0, 1.5])
-    >>> axes = np.diag(box)
-    >>> fig, ax = plt.subplots(1, 1)
-    >>> lines = draw_cell(ax, axes, corner=-box/2)
-    >>> plt.show()
+    Draw a 2D rectangular box centered at (0, 0):
+      box = np.array([3.0, 1.5])
+      axes = np.diag(box)
+      fig, ax = plt.subplots(1, 1)
+      lines = draw_cell(ax, axes, corner=-box/2)
+      plt.show()
   """
   ndim = len(axes)
   if ndim not in [2, 3]:
@@ -68,7 +84,9 @@ def draw_cell(ax, axes, corner=None, enclose=True, **kwargs):
           cell.append(line)
   return cell
 
+
 def main():
+  """Load axes/pos from axes0.dat, pos0.dat, axes1.dat, pos1.dat and plot before/after."""
   fig = plt.figure()
 
   axl = []
