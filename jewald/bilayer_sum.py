@@ -109,8 +109,8 @@ class EwaldSumSlab:
         self,
         latvec,
         hz,
-        n_up=0,
-        n_down=0,
+        n_up= None,
+        n_down= None
         attractive=False,
         n_lat=1,
         g_max=200,
@@ -203,7 +203,7 @@ class EwaldSumSlab:
         """
         dm1 = self.latvec.shape[-1] - 1
         q2_sum = jnp.sum(charge**2)
-        charge_t, charge_b = jnp.split(charge, [n_up])
+        charge_t, charge_b = jnp.split(charge, [self.n_up])
         e_self = -self.alpha / jnp.sqrt(jnp.pi) * q2_sum
         denom = dm1 * self.cellvolume * self.alpha**dm1
         e_charged_k0 = 0.0
@@ -314,8 +314,8 @@ class EwaldSumSlab:
              np = len(posn) // 2
         if nd is None:
             nd = len(posn) - np
-        n_up = int(np)
-        n_down = int(nd)
+        self.n_up = int(np)
+        self.n_down = int(nd)
 
         charge_t, charge_b = jnp.split(charge, [n_up])
         pos_t, pos_b = jnp.split(posn, [n_up])
