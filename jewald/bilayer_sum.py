@@ -110,7 +110,7 @@ class EwaldSumSlab:
         latvec,
         hz,
         n_up= None,
-        n_down= None
+        n_down= None,
         attractive=False,
         n_lat=1,
         g_max=200,
