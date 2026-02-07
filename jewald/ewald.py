@@ -57,6 +57,14 @@ class Ewald:
   """
 
   def __init__(self, alpha, ndim, omega):
+    """Initialize Ewald with splitting parameter, dimension, and cell volume.
+
+    Args:
+      alpha: float. Ewald splitting parameter (controls real vs reciprocal
+          convergence).
+      ndim: int. Number of spatial dimensions (2 or 3).
+      omega: float. Cell volume (or area in 2D).
+    """
     self.alpha = alpha
     self.ndim = ndim
     self.omega = omega

@@ -89,22 +89,7 @@ def calc_gweight_interlayer(gpoints, cellvolume, alpha, hz):
 
 
 class EwaldSumSlab:
-    """Quasi-2D Ewald summation for bilayer (slab) Coulomb interaction.
-
-    Attributes:
-        latvec: Array. In-plane lattice vectors (rows).
-        hz: float. Interlayer separation (positive).
-        chargefactor: float. +1 or -1 for repulsive/attractive interlayer.
-        recvec: Array. Reciprocal lattice vectors.
-        cellvolume: float. In-plane cell area.
-        alpha: float. Ewald splitting parameter.
-        disp_fn: Callable. Minimum-image displacement for in-plane PBC.
-        lattice_displacements: Array. Real-space lattice vectors for sum.
-        gpoints: Array. Reciprocal G-vectors used in the sum.
-        gweight: Array. Intralayer reciprocal weights.
-        gweight_interlayer: Array. Interlayer reciprocal weights.
-    """
-
+    """Quasi-2D Ewald summation for bilayer (slab) Coulomb interaction. """
     def __init__(
         self,
         latvec,
@@ -124,6 +109,9 @@ class EwaldSumSlab:
         Args:
             latvec: Array of shape (ndim, ndim). In-plane lattice vectors (rows).
             hz: float. Interlayer separation (must be positive).
+            n_up: Optional int. Number of particles in top layer; used if charge/pos
+                split differs from half-and-half. Default None (inferred in energy()).
+            n_down: Optional int. Number of particles in bottom layer. Default None.
             attractive: bool. If True, interlayer interaction is attractive
                 (opposite charges). Default False (repulsive).
             n_lat: int. Number of real-space lattice shells. Default 1.
@@ -300,12 +288,14 @@ class EwaldSumSlab:
         e_recip = 2 * self.gweight_interlayer @ sofk
         return e_recip
 
-    def energy(self, charge, posn, np = None, nd = None):
+    def energy(self, charge, posn, np=None, nd=None):
         """Total Coulomb energy for the bilayer (all terms).
 
         Args:
-            charge: Array of shape (npart,). Charges (first half = top, second = bottom).
-            pos: Array of shape (npart, ndim). Positions (first half = top, second = bottom).
+            charge: Array of shape (npart,). Charges (first n_up = top, rest = bottom).
+            posn: Array of shape (npart, ndim). Positions (first n_up = top, rest = bottom).
+            np: Optional int. Number of particles in top layer. Default None (npart // 2).
+            nd: Optional int. Number of particles in bottom layer. Default None (npart - np).
 
         Returns:
             float. Total slab Ewald Coulomb energy.
@@ -330,7 +320,21 @@ class EwaldSumSlab:
         )
 
     def calc_pe(self, elems, r, x):
-        """Warpped interface for potential energy from nuclei and electrons"""
+        """Wrapped interface: potential energy from nuclei (r) and electrons (x).
+
+        Expects nuclei (charges from elems, positions r) and electrons (positions x)
+        split into top/bottom layers; electron charges use chargefactor for interlayer
+        sign (e.g. -1 for repulsive).
+
+        Args:
+            elems: Array of shape (n_nuclei,). Nuclear charges.
+            r: Array of shape (n_nuclei, ndim). Nuclear positions.
+            x: Array of shape (n_electrons, ndim). Electron positions (half per layer).
+
+        Returns:
+            float. Total Coulomb energy (same as energy(charge, pos) with
+            constructed charge and pos from elems, r, x).
+        """
         assert elems.shape[0] == r.shape[0]
         assert elems.ndim == 1 and r.ndim == x.ndim == 2
         assert (x.shape[0] % 2) == 0

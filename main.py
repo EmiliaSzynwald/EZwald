@@ -52,8 +52,17 @@ def main():
   charge = -jnp.ones(len(pos))
 
   area = geo.calc_volume(axes)
+
   def make_cell(theta, area):
-    # fixed-volume lattice from angle
+    """Build 2D lattice vectors from cell angle and fixed area (rhombus).
+
+    Args:
+      theta: float. Angle between lattice vectors (radians).
+      area: float. Cell area (held constant).
+
+    Returns:
+      Array of shape (2, 2). Lattice vectors in row-major; rows are a, b.
+    """
     a = (area/jnp.sin(theta))**0.5
     axes = a*jnp.array([
       [1, 0],
@@ -113,6 +122,15 @@ def main():
   )
 
   def fit(params, optimizer):
+    """Run gradient-based optimization to minimize loss w.r.t. params.
+
+    Args:
+      params: Tuple (theta, pos). Initial cell angle and particle positions.
+      optimizer: optax.GradientTransformation. Optimizer (e.g. Adam).
+
+    Returns:
+      Tuple (theta, pos). Optimized parameters after nstep steps.
+    """
     @jax.jit
     def step(params, opt_state):
       loss_value, grads = grad_fn(params)

@@ -40,6 +40,9 @@ def draw_cell(ax, axes, corner=None, enclose=True, **kwargs):
   Returns:
     list. List of plot artists (e.g. Line2D/Line3D) for each drawn segment.
 
+  Raises:
+    RuntimeError: If ndim is not 2 or 3.
+
   Example:
     Draw a 2D rectangular box centered at (0, 0):
       box = np.array([3.0, 1.5])
