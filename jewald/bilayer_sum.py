@@ -18,11 +18,11 @@ def gen_positive_gpoints(recvec, g_max):
     avoid double-counting in the reciprocal sum.
 
     Args:
-        recvec: Array of shape (ndim, ndim). Reciprocal lattice vectors (rows).
-        g_max: int. Maximum |G| index per dimension.
+        recvec (array): Reciprocal lattice vectors (rows), shape (ndim, ndim).
+        g_max (int): Maximum |G| index per dimension.
 
     Returns:
-        Array of shape (nvec, ndim). G-vectors in Cartesian coordinates.
+        array: G-vectors in Cartesian coordinates, shape (nvec, ndim).
     """
     n_d = recvec.shape[0]  # number of spatial dimension
     zero = jnp.asarray([0])
@@ -43,12 +43,12 @@ def calc_gweight(gpoints, cellvolume, alpha):
     """Reciprocal-space weight for intralayer (2D) Ewald kernel.
 
     Args:
-        gpoints: Array of shape (ng, ndim). Reciprocal G-vectors.
-        cellvolume: float. In-plane cell area (2D) or volume (3D).
-        alpha: float. Ewald splitting parameter.
+        gpoints (array): Reciprocal G-vectors, shape (ng, ndim).
+        cellvolume (float): In-plane cell area (2D) or volume (3D).
+        alpha (float): Ewald splitting parameter.
 
     Returns:
-        Array of shape (ng,). Weight for each G in the intralayer reciprocal sum.
+        array: Weight for each G in the intralayer reciprocal sum, shape (ng,).
     """
     if gpoints.shape[-1] == 2:
         gnorm = jnp.linalg.norm(gpoints, axis=-1)
@@ -65,13 +65,13 @@ def calc_gweight_interlayer(gpoints, cellvolume, alpha, hz):
     """Reciprocal-space weight for interlayer Ewald kernel (slab).
 
     Args:
-        gpoints: Array of shape (ng, ndim). Reciprocal G-vectors.
-        cellvolume: float. In-plane cell area.
-        alpha: float. Ewald splitting parameter.
-        hz: float. Interlayer separation (out-of-plane distance).
+        gpoints (array): Reciprocal G-vectors, shape (ng, ndim).
+        cellvolume (float): In-plane cell area.
+        alpha (float): Ewald splitting parameter.
+        hz (float): Interlayer separation (out-of-plane distance).
 
     Returns:
-        Array of shape (ng,). Weight for each G in the interlayer reciprocal sum.
+        array: Weight for each G in the interlayer reciprocal sum, shape (ng,).
     """
     if gpoints.shape[-1] == 2:
         gnorm = jnp.linalg.norm(gpoints, axis=-1)
@@ -107,19 +107,19 @@ class EwaldSumSlab:
         """Initialize the slab Ewald class: PBC displacement, lattice displacements, and reciporcal G-points.
 
         Args:
-            latvec: Array of shape (ndim, ndim). In-plane lattice vectors (rows).
-            hz: float. Interlayer separation (must be positive).
-            n_up: Optional int. Number of particles in top layer; used if charge/pos
+            latvec (array): In-plane lattice vectors (rows), shape (ndim, ndim).
+            hz (float): Interlayer separation (must be positive).
+            n_up (int, optional): Number of particles in top layer; used if charge/pos
                 split differs from half-and-half. Default None (inferred in energy()).
-            n_down: Optional int. Number of particles in bottom layer. Default None.
-            attractive: bool. If True, interlayer interaction is attractive
+            n_down (int, optional): Number of particles in bottom layer. Default None.
+            attractive (bool): If True, interlayer interaction is attractive
                 (opposite charges). Default False (repulsive).
-            n_lat: int. Number of real-space lattice shells. Default 1.
-            g_max: int. Maximum G-index for reciprocal sum. Default 200.
-            g_threshold: float. Drop G-points with weight below this. Default 1e-12.
-            alpha: Optional float. Ewald parameter; if None, guessed from cell. Default None.
-            disp_fn_mode: str. Passed to gen_pbc_disp_fn ("auto", "diagonal", etc.). Default "auto".
-            gpoints: Optional array. Precomputed G-vectors; if None, built from g_max. Default None.
+            n_lat (int): Number of real-space lattice shells. Default 1.
+            g_max (int): Maximum G-index for reciprocal sum. Default 200.
+            g_threshold (float): Drop G-points with weight below this. Default 1e-12.
+            alpha (float, optional): Ewald parameter; if None, guessed from cell. Default None.
+            disp_fn_mode (str): Passed to gen_pbc_disp_fn ("auto", "diagonal", etc.). Default "auto".
+            gpoints (array, optional): Precomputed G-vectors; if None, built from g_max. Default None.
 
         Raises:
             ValueError: If hz < 0.
@@ -159,14 +159,29 @@ class EwaldSumSlab:
         return 5.0 / smallest_height
 
     def _prepare_lattice(self, n_lat):
-        """Build real-space lattice displacements and self-image constant (internal use)."""
+        """Build real-space lattice displacements and self-image constant (internal use).
+
+        Args:
+            n_lat (int): Number of real-space lattice shells.
+
+        Returns:
+            tuple: (lattice_displacements, simg_const).
+        """
         lattice_displacements = geo.gen_lattice(self.latvec, (2*n_lat+1,)*len(self.latvec))
         lat_norm = jnp.linalg.norm(lattice_displacements[1:], axis=-1)  # skip 0
         simg_const = jnp.sum(jax.lax.erfc(self.alpha * lat_norm) / lat_norm)
         return lattice_displacements, simg_const
 
     def _prepare_gpoints(self, g_max, g_threshold):
-        """Build G-points and weights, filtering by g_threshold (internal use)."""
+        """Build G-points and weights, filtering by g_threshold (internal use).
+
+        Args:
+            g_max (int): Maximum G-index for reciprocal sum.
+            g_threshold (float): Drop G-points with weight below this.
+
+        Returns:
+            tuple: (gpoints, gweight, gweight_interlayer).
+        """
         raw_gpoints = gen_positive_gpoints(self.recvec, g_max)
         raw_gweight = calc_gweight(raw_gpoints, self.cellvolume, self.alpha)
         raw_gweight_interlayer = calc_gweight_interlayer(
@@ -184,10 +199,10 @@ class EwaldSumSlab:
         """Constant (self + k=0) contribution for the slab Ewald sum.
 
         Args:
-            charge: Array of shape (npart,). All particle charges (top then bottom).
+            charge (array): All particle charges (top then bottom), shape (npart,).
 
         Returns:
-            Tuple (e_self, e_charged_k0). Self-energy and k=0 background terms.
+            tuple: (e_self, e_charged_k0). Self-energy and k=0 background terms.
         """
         dm1 = self.latvec.shape[-1] - 1
         q2_sum = jnp.sum(charge**2)
@@ -220,11 +235,11 @@ class EwaldSumSlab:
         """Real-space intralayer contribution for one layer.
 
         Args:
-            charge: Array of shape (n,). Charges of particles in this layer.
-            pos: Array of shape (n, ndim). Positions in this layer.
+            charge (array): Charges of particles in this layer, shape (n,).
+            pos (array): Positions in this layer, shape (n, ndim).
 
         Returns:
-            float. Real-space intralayer energy for this layer.
+            float: Real-space intralayer energy for this layer.
         """
         disp = geo.displace_matrix(pos, pos, disp_fn=self.disp_fn)
         rvec = disp[None, :, :, :] + self.lattice_displacements[:, None, None, :]
@@ -238,11 +253,11 @@ class EwaldSumSlab:
         """Reciprocal-space intralayer contribution for one layer.
 
         Args:
-            charge: Array of shape (n,). Charges of particles in this layer.
-            pos: Array of shape (n, ndim). Positions in this layer.
+            charge (array): Charges of particles in this layer, shape (n,).
+            pos (array): Positions in this layer, shape (n, ndim).
 
         Returns:
-            float. Reciprocal-space intralayer energy for this layer.
+            float: Reciprocal-space intralayer energy for this layer.
         """
         sofk_val = sofk.structure_factor(self.gpoints, pos, charge)
         e_recip = self.gweight @ sofk_val
@@ -252,13 +267,13 @@ class EwaldSumSlab:
         """Real-space interlayer contribution between top and bottom layers.
 
         Args:
-            charge_t: Array of shape (n_t,). Top layer charges.
-            pos_t: Array of shape (n_t, ndim). Top layer positions.
-            charge_b: Array of shape (n_b,). Bottom layer charges.
-            pos_b: Array of shape (n_b, ndim). Bottom layer positions.
+            charge_t (array): Top layer charges, shape (n_t,).
+            pos_t (array): Top layer positions, shape (n_t, ndim).
+            charge_b (array): Bottom layer charges, shape (n_b,).
+            pos_b (array): Bottom layer positions, shape (n_b, ndim).
 
         Returns:
-            float. Real-space interlayer energy.
+            float: Real-space interlayer energy.
         """
         disp = geo.displace_matrix(pos_t, pos_b, disp_fn=self.disp_fn)
         rvec = disp[None, :, :, :] + self.lattice_displacements[:, None, None, :]
@@ -271,13 +286,13 @@ class EwaldSumSlab:
         """Reciprocal-space interlayer contribution between top and bottom layers.
 
         Args:
-            charge_t: Array of shape (n_t,). Top layer charges.
-            pos_t: Array of shape (n_t, ndim). Top layer positions.
-            charge_b: Array of shape (n_b,). Bottom layer charges.
-            pos_b: Array of shape (n_b, ndim). Bottom layer positions.
+            charge_t (array): Top layer charges, shape (n_t,).
+            pos_t (array): Top layer positions, shape (n_t, ndim).
+            charge_b (array): Bottom layer charges, shape (n_b,).
+            pos_b (array): Bottom layer positions, shape (n_b, ndim).
 
         Returns:
-            float. Reciprocal-space interlayer energy.
+            float: Reciprocal-space interlayer energy.
         """
         g_dot_r_t = self.gpoints @ pos_t.T  # [n_gpoints, n_particle]
         rhok_t = jnp.exp(1j * g_dot_r_t) @ charge_t  # [n_gpoints,]
@@ -292,13 +307,13 @@ class EwaldSumSlab:
         """Total Coulomb energy for the bilayer (all terms).
 
         Args:
-            charge: Array of shape (npart,). Charges (first n_up = top, rest = bottom).
-            posn: Array of shape (npart, ndim). Positions (first n_up = top, rest = bottom).
-            np: Optional int. Number of particles in top layer. Default None (npart // 2).
-            nd: Optional int. Number of particles in bottom layer. Default None (npart - np).
+            charge (array): Charges (first n_up = top, rest = bottom), shape (npart,).
+            posn (array): Positions (first n_up = top, rest = bottom), shape (npart, ndim).
+            np (int, optional): Number of particles in top layer. Default None (npart // 2).
+            nd (int, optional): Number of particles in bottom layer. Default None (npart - np).
 
         Returns:
-            float. Total slab Ewald Coulomb energy.
+            float: Total slab Ewald Coulomb energy.
         """
         if np is None:
              np = len(posn) // 2
@@ -327,12 +342,12 @@ class EwaldSumSlab:
         sign (e.g. -1 for repulsive).
 
         Args:
-            elems: Array of shape (n_nuclei,). Nuclear charges.
-            r: Array of shape (n_nuclei, ndim). Nuclear positions.
-            x: Array of shape (n_electrons, ndim). Electron positions (half per layer).
+            elems (array): Nuclear charges, shape (n_nuclei,).
+            r (array): Nuclear positions, shape (n_nuclei, ndim).
+            x (array): Electron positions (half per layer), shape (n_electrons, ndim).
 
         Returns:
-            float. Total Coulomb energy (same as energy(charge, pos) with
+            float: Total Coulomb energy (same as energy(charge, pos) with
             constructed charge and pos from elems, r, x).
         """
         assert elems.shape[0] == r.shape[0]

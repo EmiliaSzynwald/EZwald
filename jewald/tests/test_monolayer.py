@@ -14,7 +14,7 @@ def test_Square(nx=2):
 
     This test verifies that the Ewald sum computed for a nx x nx square lattice
     matches the analytical result reported in:
-    'Some static and dynamical properties of a two-dimensional Wigner crystal'.
+    'Bonsall, L., and A. A. Maradudin, Phys. Rev. B 15, 1959–1973 (1977), Fig. 2.'.
 
     Args:
         nx (int): Tiling factor along x and y directions (default is 2).
@@ -50,13 +50,6 @@ def test_Square(nx=2):
 def test_PrimitiveRectangle(nx=2):
     """Test Ewald sum energy per particle for nx x nx tiled rectangular supercells.
 
-    This test verifies that the Ewald sum computed for an nx x nx rectangular lattice
-    matches the analytical result reported in:
-    'Some static and dynamical properties of a two-dimensional Wigner crystal'.
-
-    Args:
-        nx (int): Tiling factor along x and y directions (default is 2).
-
     The function compares the computed result to the reference value within an absolute
     tolerance of 1e-6.
     """
@@ -89,13 +82,6 @@ def test_PrimitiveRectangle(nx=2):
 
 def test_CenteredRectangle(nx=2):
     """Test Ewald sum energy per particle for nx x nx tiled centered-rectangle supercells.
-
-    This test verifies that the Ewald sum computed for an nx x nx centered rectangular lattice
-    matches the analytical result reported in:
-    'Some static and dynamical properties of a two-dimensional Wigner crystal'.
-
-    Args:
-        nx (int): Tiling factor along x and y directions (default is 2).
 
     The function compares the computed result to the reference value within an absolute
     tolerance of 1e-6.
@@ -133,13 +119,6 @@ def test_CenteredRectangle(nx=2):
 
 def test_Hexagon(nx=2):
     """Test Ewald sum energy per particle for nx x nx tiled hexagonal (triangular) supercells.
-
-    This test verifies that the Ewald sum computed for an nx x nx triangular/hexagonal lattice
-    matches the analytical result reported in:
-    'Some static and dynamical properties of a two-dimensional Wigner crystal'.
-
-    Args:
-        nx (int): Tiling factor along x and y directions (default is 2).
 
     The function compares the computed result to the reference value within an absolute
     tolerance of 1e-6.

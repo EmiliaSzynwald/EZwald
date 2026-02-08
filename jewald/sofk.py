@@ -8,14 +8,15 @@ import jax.numpy as jnp
 
 
 def calc_eikr(kvecs, pos):
-  """Compute exp(i k·r) for each k-vector and particle position.
+  """Compute the dot product (exp(i k·r)) of each k-vector with each particle position
 
   Args:
-    kvecs: Array of shape (..., ndim). Reciprocal-space vectors.
-    pos: Array of shape (npart, ndim). Particle positions.
+    kvecs (array): Reciprocal-space vectors, shape (..., ndim).
+    pos (array): Particle positions, shape (npart, ndim).
 
   Returns:
-    Array of shape (..., npart). Complex exponentials exp(i k·r_j).
+    array: Complex exponentials exp(i k·r_j) which represents a plane wave for each k-vector and particle position, 
+      shape (..., npart).
   """
   kdotr = jnp.einsum('...i,ri->...r', kvecs, pos)
   eikr = jnp.exp(1j*kdotr)
@@ -28,12 +29,12 @@ def structure_factor(kvecs, pos, charge):
   rho(k) = sum_j charge_j * exp(-i k·r_j); structure factor S(k) = |rho(k)|^2.
 
   Args:
-    kvecs: Array of shape (nk, ndim). Reciprocal-space vectors.
-    pos: Array of shape (npart, ndim). Particle positions.
-    charge: Array of shape (npart,). Particle charges.
+    kvecs (array): Reciprocal-space vectors, shape (nk, ndim).
+    pos (array): Particle positions, shape (npart, ndim).
+    charge (array): Particle charges, shape (npart,).
 
   Returns:
-    Array of shape (nk,). Real-valued structure factor for each k-vector.
+    array: Real-valued structure factor for each k-vector, shape (nk,).
   """
   rhok = jnp.dot(calc_eikr(kvecs, pos), charge)
   sk = (rhok.conj()*rhok).real

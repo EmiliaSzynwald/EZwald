@@ -10,15 +10,15 @@ import jax
 import jax.numpy as jnp
 
 
+##### Basic Lattice Utilities #####
 def calc_recvec(latvec):
     """Compute reciprocal lattice vectors from direct lattice vectors.
 
     Args:
-        latvec: Array of shape (ndim, ndim). Direct lattice vectors (rows).
+        latvec (array): Direct lattice vectors (rows), shape (ndim, ndim).
 
     Returns:
-        Array of shape (ndim, ndim). Reciprocal lattice vectors (rows);
-        b_i = 2*pi * (a_j x a_k) / omega for cyclic i,j,k.
+        array: Reciprocal lattice vectors (rows), shape (ndim, ndim);
     """
     return 2*jnp.pi*jnp.linalg.inv(latvec).T
 
@@ -27,10 +27,10 @@ def calc_volume(latvec):
     """Compute cell volume (or area in 2D) from lattice vectors.
 
     Args:
-        latvec: Array of shape (ndim, ndim). Lattice vectors (rows).
+        latvec (array): Lattice vectors (rows), shape (ndim, ndim).
 
     Returns:
-        float. Absolute value of the determinant (cell volume).
+        float: Absolute value of the determinant (cell volume).
     """
     return jnp.abs(jnp.linalg.det(latvec))
 
@@ -39,12 +39,12 @@ def gen_ticks(mesh: Sequence[int], kspace: bool = True):
     """Generate index ticks to discretize direct or reciprocal space.
 
     Args:
-        mesh: Sequence of int. Number of points along each dimension.
-        kspace: bool. If True, use FFT-style (centered) ticks for k-space;
+        mesh (Sequence[int]): Number of points along each dimension.
+        kspace (bool): If True, use FFT-style (centered) ticks for k-space;
             if False, use 0..nx-1 for real space. Default True.
 
     Returns:
-        List of arrays. One array per dimension; integer indices.
+        list: One array per dimension; integer indices.
     """
     if kspace:
         ticks = [jnp.around(jnp.fft.fftfreq(nx)*nx).astype(int) for nx in mesh]
@@ -57,12 +57,12 @@ def gen_indices(ticks, positive: bool = False):
     """Generate all Miller index combinations from ticks.
 
     Args:
-        ticks: List of 1D arrays; index values per dimension.
-        positive: bool. If True, restrict to half-space (e.g. k_z >= 0)
+        ticks (list): 1D arrays; index values per dimension.
+        positive (bool): If True, restrict to half-space (e.g. k_z >= 0)
             to avoid double-counting. Default False.
 
     Returns:
-        Array of shape (prod(mesh), ndim). Integer Miller indices.
+        array: Integer Miller indices, shape (prod(mesh), ndim).
     """
     ndim = len(ticks)
     idx = jnp.stack(
@@ -77,14 +77,14 @@ def gen_indices(ticks, positive: bool = False):
 
 
 def gen_kvecs(recvec, mesh: Sequence[int]):
-    """Generate reciprocal-space grid from reciprocal vectors and mesh.
+    """Generate reciprocal-space grid from reciprocal lattice vectors and mesh.
 
     Args:
-        recvec: Array of shape (ndim, ndim). Reciprocal lattice vectors (rows).
-        mesh: Sequence of int. Number of k-points per dimension.
+        recvec (array): Reciprocal lattice vectors (rows), shape (ndim, ndim).
+        mesh (Sequence[int]): Number of k-points per dimension.
 
     Returns:
-        Array of shape (prod(mesh), ndim). k-vectors in Cartesian coordinates.
+        array: k-vectors in Cartesian coordinates, shape (prod(mesh), ndim).
     """
     ticks = gen_ticks(mesh)
     return gen_indices(ticks) @ recvec
@@ -94,14 +94,14 @@ def gen_lattice(latvec, mesh: Sequence[int], kspace: bool = True, positive: bool
     """Generate Bravais lattice points from lattice vectors and mesh.
 
     Args:
-        latvec: Array of shape (ndim, ndim). Lattice vectors (rows).
-        mesh: Sequence of int. Number of points per dimension.
-        kspace: bool. If True, use FFT-style ticks (for k-space); if False,
+        latvec (array): Lattice vectors (rows), shape (ndim, ndim).
+        mesh (Sequence[int]): Number of points per dimension.
+        kspace (bool): If True, use FFT-style ticks (for k-space); if False,
             use 0..n-1 (for real-space supercells). Default True.
-        positive: bool. If True, restrict to half-space indices. Default False.
+        positive (bool): If True, restrict to half-space indices. Default False.
 
     Returns:
-        Array of shape (prod(mesh), ndim). Lattice point coordinates.
+        array: Lattice point coordinates, shape (prod(mesh), ndim).
     """
     ticks = gen_ticks(mesh, kspace=kspace)
     return gen_indices(ticks, positive=positive) @ latvec
@@ -114,11 +114,11 @@ def calc_rwsc(latvec, nx: int = 3):
     minimum distance to a neighbor (inscribing radius).
 
     Args:
-        latvec: Array of shape (ndim, ndim). Lattice vectors (rows).
-        nx: int. Half-width of the index range per dimension. Default 3.
+        latvec (array): Lattice vectors (rows), shape (ndim, ndim).
+        nx (int): Half-width of the index range per dimension. Default 3.
 
     Returns:
-        float. Inscribing radius (half of minimum image distance).
+        float: Inscribing radius (half of minimum image distance).
     """
     mesh = (2*nx+1,)*len(latvec)
     pos = gen_lattice(latvec, mesh)
@@ -130,11 +130,11 @@ def guess_kmesh(recvec, kcut: float) -> Sequence[int]:
     """Estimate k-mesh size so that the first shell reaches kcut.
 
     Args:
-        recvec: Array of shape (ndim, ndim). Reciprocal lattice vectors.
-        kcut: float. Desired reciprocal-space cutoff magnitude.
+        recvec (array): Reciprocal lattice vectors, shape (ndim, ndim).
+        kcut (float): Desired reciprocal-space cutoff magnitude.
 
     Returns:
-        Tuple of int. Suggested mesh (2*nmax,) per dimension.
+        tuple: Suggested mesh (2*nmax,) per dimension.
     """
     ndim = len(recvec)
     # first shell of neighbors in reciprocal space
@@ -150,12 +150,12 @@ def tile(pos, mesht, cell):
     """Tile particle positions into a supercell via lattice translations.
 
     Args:
-        pos: Array of shape (npart, ndim). Positions in the unit cell.
-        mesht: Sequence of int. Supercell multiplicity per dimension.
-        cell: Array of shape (ndim, ndim). Lattice vectors (rows).
+        pos (array): Positions in the unit cell, shape (npart, ndim).
+        mesht (Sequence[int]): Supercell multiplicity per dimension.
+        cell (array): Lattice vectors (rows), shape (ndim, ndim).
 
     Returns:
-        Array of shape (npart * prod(mesht), ndim). All image positions.
+        array: All image positions, shape (npart * prod(mesht), ndim).
     """
     ndim = len(cell)
     rvecs = gen_lattice(cell, mesht, kspace=False)
@@ -164,15 +164,16 @@ def tile(pos, mesht, cell):
     return pos1
 
 
+##### Minimum Image Convention #####
 def determine_cell_type(latvec, ortho_tol=1e-10) -> str:
     """Classify cell as diagonal, orthogonal, or general for PBC dispatch.
 
     Args:
-        latvec: Array of shape (ndim, ndim). Lattice vectors (rows).
-        ortho_tol: float. Tolerance for zero off-diagonal elements. Default 1e-10.
+        latvec (array): Lattice vectors (rows), shape (ndim, ndim).
+        ortho_tol (float): Tolerance for zero off-diagonal elements. Default 1e-10.
 
     Returns:
-        str. One of "diagonal", "orthogonal", "general".
+        str: One of "diagonal", "orthogonal", "general".
     """
     is_diagonal = jnp.all(jnp.abs(latvec - jnp.diag(jnp.diag(latvec))) < ortho_tol)
     if is_diagonal:
@@ -187,13 +188,13 @@ def gen_pbc_disp_fn(latvec, mode="auto"):
     """Build a minimum-image displacement function for the given cell.
 
     Args:
-        latvec: Array of shape (ndim, ndim). Lattice vectors (rows).
-        mode: str. "auto" (detect from latvec), "diagonal", "orthogonal", or
+        latvec (array): Lattice vectors (rows), shape (ndim, ndim).
+        mode (str): "auto" (detect from latvec), "diagonal", "orthogonal", or
             "general". Default "auto".
 
     Returns:
-        Callable (xa, xb) -> disp. Returns the minimum-image vector xa - xb
-        (or equivalent for general cells). Inputs/outputs are (ndim,) arrays.
+        callable: (xa, xb) -> disp. Minimum-image vector xa - xb (or equivalent
+            for general cells). Inputs/outputs are (ndim,) arrays.
 
     Raises:
         ValueError: If mode is not recognized.
@@ -242,14 +243,14 @@ def displace_matrix(xa, xb, disp_fn=None):
     """Pairwise displacement matrix with optional PBC minimum image.
 
     Args:
-        xa: Array of shape (na, ndim). First set of positions.
-        xb: Array of shape (nb, ndim). Second set of positions.
-        disp_fn: Optional callable (x1, x2) -> disp. If None, use plain
+        xa (array): First set of positions, shape (na, ndim).
+        xb (array): Second set of positions, shape (nb, ndim).
+        disp_fn (callable, optional): (x1, x2) -> disp. If None, use plain
             difference xa - xb (no PBC).
 
     Returns:
-        Array of shape (na, nb, ndim). Displacement xa[i] - xb[j] (or
-        minimum-image equivalent if disp_fn is set).
+        array: Displacement xa[i] - xb[j] (or minimum-image equivalent if
+            disp_fn is set), shape (na, nb, ndim).
     """
     if disp_fn is None:
         return jnp.expand_dims(xa, -2) - jnp.expand_dims(xb, -3)
@@ -258,17 +259,17 @@ def displace_matrix(xa, xb, disp_fn=None):
 
 
 def get_nvecs(axes, pos, atol=1e-10):
-    """Find integer lattice indices corresponding to given positions.
+    """Find integer vectors of lattice positions from unit cell.
 
     Computes n such that pos ≈ n @ axes (rounded to nearest integer).
 
     Args:
-        axes: Array of shape (ndim, ndim). Lattice vectors (rows).
-        pos: Array of shape (..., ndim). Positions in Cartesian coordinates.
-        atol: float. Not used; kept for API compatibility. Default 1e-10.
+        axes (array): Lattice vectors (rows), shape (ndim, ndim).
+        pos (array): Positions in Cartesian coordinates, shape (..., ndim).
+        atol (float): Not used. Default 1e-10.
 
     Returns:
-        Array of integers, same shape as pos. Miller indices.
+        array: Miller indices (integers), same shape as pos.
     """
     inv_axes = jnp.linalg.inv(axes)
     ncands = pos @ inv_axes
@@ -283,12 +284,12 @@ def pos_in_axes(axes, pos, ztol=1e-10):
     Positions on the boundary (within ztol of 1) are mapped to 0.
 
     Args:
-        axes: Array of shape (ndim, ndim). Lattice vectors (rows).
-        pos: Array of shape (..., ndim). Positions in Cartesian coordinates.
-        ztol: float. Tolerance for treating fractional coord 1 as 0. Default 1e-10.
+        axes (array): Lattice vectors (rows), shape (ndim, ndim).
+        pos (array): Positions in Cartesian coordinates, shape (..., ndim).
+        ztol (float): Tolerance for treating fractional coord 1 as 0. Default 1e-10.
 
     Returns:
-        Array, same shape as pos. Positions folded into [0,1) @ axes.
+        array: Positions folded into [0,1) @ axes, same shape as pos.
     """
     upos = pos @ jnp.linalg.inv(axes)
     u = upos % 1
@@ -299,17 +300,17 @@ def pos_in_axes(axes, pos, ztol=1e-10):
 
 
 def get_ksphere(raxes, kc, margin=0.2, twist=None):
-    """Generate k-vectors with |k| < kc on the reciprocal lattice (+ optional twist).
+    """Generate a set of k-vectors within a sphere of radius kc (+ optional twist).
 
     Args:
-        raxes: Array of shape (ndim, ndim). Reciprocal lattice vectors (rows).
-        kc: float. Cutoff magnitude; only k with |k| < kc are returned.
-        margin: float. Internal mesh uses (1+margin)*kc to ensure coverage. Default 0.2.
-        twist: Optional array of shape (ndim,). Twist vector in fractional
-            reciprocal coordinates; added to all k. Default None (no twist).
+        raxes (array): Reciprocal lattice vectors (rows), shape (ndim, ndim).
+        kc (float): Cutoff magnitude; only k with |k| < kc are returned.
+        margin (float): Internal mesh uses (1+margin)*kc to ensure coverage. Default 0.2.
+        twist (array, optional): Twist vector in fractional reciprocal coordinates,
+            shape (ndim,); added to all k. Default None (no twist).
 
     Returns:
-        Array of shape (nvec, ndim). k-vectors satisfying |k| < kc.
+        array: k-vectors satisfying |k| < kc, shape (nvec, ndim).
     """
     ndim = raxes.shape[0]
     kmesh = guess_kmesh(raxes, (1+margin)*kc)

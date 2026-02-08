@@ -16,7 +16,7 @@ def set_default_cell_styles(kwargs):
   Modifies kwargs in place; only sets keys that are not already present.
 
   Args:
-    kwargs: dict. Keyword arguments for plotting (e.g. for plt.plot).
+    kwargs (dict): Keyword arguments for plotting (e.g. for plt.plot). Modified in place.
   """
   if not (('c' in kwargs) or ('color' in kwargs)):
     kwargs['c'] = 'gray'
@@ -30,15 +30,15 @@ def draw_cell(ax, axes, corner=None, enclose=True, **kwargs):
   """Draw the unit cell (lattice vectors and optionally full enclosure) on ax.
 
   Args:
-    ax: matplotlib Axes. Must support 2D or 3D (e.g. projection='3d' for 3D).
-    axes: Array of shape (ndim, ndim). Lattice vectors in row-major (rows = a, b, c).
-    corner: Optional array of shape (ndim,). Origin for drawing; default (0,...,0).
-    enclose: bool. If True, draw all edges to enclose the cell; if False, only
+    ax (matplotlib.axes.Axes): Axes to draw on. Must support 2D or 3D (e.g. projection='3d' for 3D).
+    axes (array): Lattice vectors in row-major (rows = a, b, c), shape (ndim, ndim).
+    corner (array, optional): Origin for drawing, shape (ndim,). Default (0,...,0).
+    enclose (bool): If True, draw all edges to enclose the cell; if False, only
         the lattice vectors from corner. Default True.
     **kwargs: Keyword arguments passed to plt.plot (color, linewidth, etc.).
 
   Returns:
-    list. List of plot artists (e.g. Line2D/Line3D) for each drawn segment.
+    list: Plot artists (e.g. Line2D/Line3D) for each drawn segment.
 
   Raises:
     RuntimeError: If ndim is not 2 or 3.
@@ -89,7 +89,11 @@ def draw_cell(ax, axes, corner=None, enclose=True, **kwargs):
 
 
 def main():
-  """Load axes/pos from axes0.dat, pos0.dat, axes1.dat, pos1.dat and plot before/after."""
+  """Load axes/pos from axes0.dat, pos0.dat, axes1.dat, pos1.dat and plot before/after.
+
+  Returns:
+    None.
+  """
   fig = plt.figure()
 
   axl = []

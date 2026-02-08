@@ -26,8 +26,8 @@ def test_staggered_square(d, expected):
 
     This test verifies that the slab Ewald sum computed for a staggered square
     bilayer (two layers with in-plane square lattice) reproduces the reference
-    rescaled energy E/sqrt(n) for the given interlayer separation 
-    (Goldoni & Peeters, Phys. Rev. B 53, 4591–4603 (1996), Fig. 1).
+    rescaled energy E/sqrt(n) for the given interlayer separation reported in:
+    'Goldoni & Peeters, Phys. Rev. B 53, 4591-4603 (1996), Fig. 1'.
 
     Args:
         d (float): Interlayer separation.
@@ -72,7 +72,7 @@ def test_tile_staggered_square(d, expected, nx=2):
     x = np.concatenate([_disp + x0 for _disp in disp])
     reg_pos = x@reg_cell
 
-    n_up = int(len(reg_pos)/2)
+    n_up = int(round( len(reg_pos)/2 ))
     n_down = len(reg_pos) - n_up
 
     reg_pos_t, reg_pos_b = np.split(reg_pos, [n_up])
@@ -128,7 +128,7 @@ def test_tile_rectangular(d, expected, nx=2):
     x = np.concatenate([_disp + x0 for _disp in disp])
     reg_pos = x@reg_cell
 
-    n_up = int(len(reg_pos)/2)
+    n_up = int(round( len(reg_pos)/2 ))
     n_down = len(reg_pos) - n_up
 
     reg_pos_t, reg_pos_b = np.split(reg_pos, [n_up])
@@ -178,7 +178,7 @@ def test_tile_staggered_hexagonal(d, expected, nx=2):
     x = np.concatenate([_disp + x0 for _disp in disp])
     reg_pos = x@reg_cell
 
-    n_up = int(len(reg_pos)/2)
+    n_up = int(round( len(reg_pos)/2 ))
     n_down = len(reg_pos) - n_up
 
     reg_pos_t, reg_pos_b = np.split(reg_pos, [n_up])

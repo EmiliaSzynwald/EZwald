@@ -1,9 +1,8 @@
-"""Ewald summation for periodic Coulomb interactions in 2D and 3D.
+"""Ewald summation for periodic Coulomb interactions.
 
 This module implements the standard Ewald decomposition of the Coulomb sum
 into real-space (short-range), reciprocal-space (long-range), and constant
-(self + background) terms. Supports both 2D and 3D periodic boundary
-conditions.
+(self + background) terms. 
 """
 
 import jax.numpy as jnp
@@ -15,15 +14,14 @@ def make_ewald(axes, rckc=30.0):
   """Build Ewald object and lattice vectors for a given cell.
 
   Args:
-    axes: Array of shape (ndim, ndim). Lattice vectors in row-major form
-        (each row is a lattice vector).
-    rckc: float. Product of real-space cutoff and reciprocal-space cutoff;
-        controls Ewald convergence (default 30.0).
+    axes (array): Lattice vectors in row-major form (each row is a lattice
+        vector), shape (ndim, ndim).
+    rckc (float): Product of real-space cutoff and reciprocal-space cutoff;
+        controls Ewald convergence. Default 30.0.
 
   Returns:
-    ew: Ewald instance configured for the cell.
-    rvecs: Real-space lattice displacement vectors for the Ewald sum.
-    kvecs: Reciprocal-space vectors (excluding k=0) for the Ewald sum.
+    tuple: (ew, rvecs, kvecs). Ewald instance; real-space lattice displacement
+        vectors; reciprocal-space vectors (excluding k=0).
   """
   rvecs, kvecs = lattice.make_lattice(axes, rckc)
   rc, kc = lattice.compute_cutoffs(axes, rckc)
@@ -38,11 +36,11 @@ def alpha(rc, kc):
   """Ewald splitting parameter from real- and reciprocal-space cutoffs.
 
   Args:
-    rc: float. Real-space cutoff distance.
-    kc: float. Reciprocal-space cutoff magnitude.
+    rc (float): Real-space cutoff distance.
+    kc (float): Reciprocal-space cutoff magnitude.
 
   Returns:
-    float. Splitting parameter alpha = sqrt(kc / (2*rc)).
+    float: Splitting parameter alpha = sqrt(kc / (2*rc)).
   """
   return jnp.sqrt(kc/(2*rc))
 
@@ -51,19 +49,19 @@ class Ewald:
   """Ewald summation for Coulomb energy in a periodic cell.
 
   Attributes:
-    alpha: float. Ewald splitting parameter.
-    ndim: int. Number of spatial dimensions (2 or 3).
-    omega: float. Cell volume (or area in 2D).
+    alpha (float): Ewald splitting parameter.
+    ndim (int): Number of spatial dimensions (2 or 3).
+    omega (float): Cell volume (or area in 2D).
   """
 
   def __init__(self, alpha, ndim, omega):
     """Initialize Ewald with splitting parameter, dimension, and cell volume.
 
     Args:
-      alpha: float. Ewald splitting parameter (controls real vs reciprocal
+      alpha (float): Ewald splitting parameter (controls real vs reciprocal
           convergence).
-      ndim: int. Number of spatial dimensions (2 or 3).
-      omega: float. Cell volume (or area in 2D).
+      ndim (int): Number of spatial dimensions (2 or 3).
+      omega (float): Cell volume (or area in 2D).
     """
     self.alpha = alpha
     self.ndim = ndim
@@ -73,14 +71,13 @@ class Ewald:
     """Total Coulomb energy: constant + real-space + reciprocal-space terms.
 
     Args:
-      pos: Array of shape (npart, ndim). Particle positions in Cartesian
-          coordinates.
-      charge: Array of shape (npart,). Particle charges.
-      rvecs: Real-space lattice displacement vectors.
-      kvecs: Reciprocal-space vectors (excluding k=0).
+      pos (array): Particle positions in Cartesian coordinates, shape (npart, ndim).
+      charge (array): Particle charges, shape (npart,).
+      rvecs (array): Real-space lattice displacement vectors.
+      kvecs (array): Reciprocal-space vectors (excluding k=0).
 
     Returns:
-      float. Total Ewald Coulomb energy.
+      float: Total Ewald Coulomb energy.
     """
     vconst = self.constant(charge)
     vsr = self.sum_sr(pos, charge, rvecs)
@@ -91,7 +88,7 @@ class Ewald:
     """Reciprocal-space k=0 coefficient for the short-range (neutralizing) term.
 
     Returns:
-      float. Coefficient for the charge-squared sum in the constant term.
+      float: Coefficient for the charge-squared sum in the constant term.
     """
     dm1 = self.ndim-1
     denom = dm1*self.alpha**dm1*self.omega
@@ -101,7 +98,7 @@ class Ewald:
     """Real-space r=0 coefficient for the long-range (self) term.
 
     Returns:
-      float. Coefficient for the self-energy in the constant term.
+      float: Coefficient for the self-energy in the constant term.
     """
     return 2*self.alpha/jnp.pi**0.5
 
@@ -109,10 +106,10 @@ class Ewald:
     """Constant term: self-energy and neutralizing background.
 
     Args:
-      charge: Array of shape (npart,). Particle charges.
+      charge (array): Particle charges, shape (npart,).
 
     Returns:
-      float. Constant (k=0, r=0) contribution to the Ewald energy.
+      float: Constant (k=0, r=0) contribution to the Ewald energy.
     """
     vsr_k0 = self.vsr_k0()
     vlr_r0 = self.vlr_r0()
@@ -126,23 +123,23 @@ class Ewald:
     """Short-range (real-space) pair potential: erfc(alpha*r)/r.
 
     Args:
-      r: Array of pair distances.
+      r (array): Pair distances.
 
     Returns:
-      Array. Same shape as r; potential values.
+      array: Potential values, same shape as r.
     """
     return erfc(self.alpha*r)/r
 
   def sum_sr(self, pos, charge, rvecs):
-    """Real-space (short-range) sum over all pairs and lattice images.
+    """Real-space (short-range) sum over all unique particle pairs and lattice shifts.
 
     Args:
-      pos: Array of shape (npart, ndim). Particle positions.
-      charge: Array of shape (npart,). Particle charges.
-      rvecs: Real-space lattice displacement vectors.
+      pos (array): Particle positions, shape (npart, ndim).
+      charge (array): Particle charges, shape (npart,).
+      rvecs (array): Real-space lattice displacement vectors.
 
     Returns:
-      float. Real-space contribution to the Ewald energy.
+      float: Real-space contribution to the Ewald energy.
     """
     esr = 0.0
     npart = len(pos)
@@ -161,13 +158,13 @@ class Ewald:
     return esr
 
   def fvlr_k2d(self, k):
-    """Long-range (reciprocal-space) potential kernel for 2D.
+    """Long-range (reciprocal-space) potential for 2D.
 
     Args:
-      k: Array of reciprocal-space magnitudes.
+      k (array): Reciprocal-space magnitudes.
 
     Returns:
-      Array. Same shape as k; 2D reciprocal-space kernel.
+      array: 2D reciprocal-space kernel, same shape as k.
     """
     dm1 = self.ndim-1
     ak = k/(2*self.alpha)
@@ -175,13 +172,13 @@ class Ewald:
     return vk*erfc(ak)
 
   def fvlr_k3d(self, k):
-    """Long-range (reciprocal-space) potential kernel for 3D.
+    """Long-range (reciprocal-space) potential for 3D.
 
     Args:
-      k: Array of reciprocal-space magnitudes.
+      k (array): Reciprocal-space magnitudes.
 
     Returns:
-      Array. Same shape as k; 3D reciprocal-space kernel.
+      array: 3D reciprocal-space kernel, same shape as k.
     """
     dm1 = self.ndim-1
     ak = k/(2*self.alpha)
@@ -192,12 +189,12 @@ class Ewald:
     """Reciprocal-space (long-range) sum via structure factor.
 
     Args:
-      pos: Array of shape (npart, ndim). Particle positions.
-      charge: Array of shape (npart,). Particle charges.
-      kvecs: Reciprocal-space vectors (excluding k=0).
+      pos (array): Particle positions, shape (npart, ndim).
+      charge (array): Particle charges, shape (npart,).
+      kvecs (array): Reciprocal-space vectors (excluding k=0).
 
     Returns:
-      float. Reciprocal-space contribution to the Ewald energy.
+      float: Reciprocal-space contribution to the Ewald energy.
     """
     kmags = jnp.linalg.norm(kvecs, axis=-1)
     vlr_k = self.fvlr_k2d(kmags) if self.ndim == 2 else self.fvlr_k3d(kmags)

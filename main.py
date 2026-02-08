@@ -17,6 +17,9 @@ def main():
   Creates a 2D triangular lattice, builds Ewald + lattice, and minimizes
   total Coulomb energy w.r.t. cell angle (and positions if randomized).
   Saves axes and positions before/after to axes0.dat, pos0.dat, axes1.dat, pos1.dat.
+
+  Returns:
+    None.
   """
   from argparse import ArgumentParser
   parser = ArgumentParser()
@@ -57,11 +60,11 @@ def main():
     """Build 2D lattice vectors from cell angle and fixed area (rhombus).
 
     Args:
-      theta: float. Angle between lattice vectors (radians).
-      area: float. Cell area (held constant).
+      theta (float): Angle between lattice vectors (radians).
+      area (float): Cell area (held constant).
 
     Returns:
-      Array of shape (2, 2). Lattice vectors in row-major; rows are a, b.
+      array: Lattice vectors in row-major (rows are a, b), shape (2, 2).
     """
     a = (area/jnp.sin(theta))**0.5
     axes = a*jnp.array([
@@ -125,11 +128,11 @@ def main():
     """Run gradient-based optimization to minimize loss w.r.t. params.
 
     Args:
-      params: Tuple (theta, pos). Initial cell angle and particle positions.
-      optimizer: optax.GradientTransformation. Optimizer (e.g. Adam).
+      params (tuple): Initial (theta, pos). Cell angle and particle positions.
+      optimizer (optax.GradientTransformation): Optimizer (e.g. Adam).
 
     Returns:
-      Tuple (theta, pos). Optimized parameters after nstep steps.
+      tuple: Optimized (theta, pos) after nstep steps.
     """
     @jax.jit
     def step(params, opt_state):
