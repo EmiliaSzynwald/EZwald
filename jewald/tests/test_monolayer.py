@@ -1,21 +1,24 @@
+"""Monolayer Ewald tests: square, rectangular, centered-rectangle, and hexagonal lattices.
+
+Compares Ewald sum energies per particle to analytical references from
+'Some static and dynamical properties of a two-dimensional Wigner crystal'.
+"""
+
 import numpy as np
-import jax
-jax.config.update("jax_enable_x64", True)
-import pytest
-import sys, os
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
-from jewald import axes_pos, ewald, lattice
+import jax.numpy as jnp
+from jewald import ewald, geometry as geo
+
 
 def test_Square(nx=2):
     """Test Ewald sum energy per particle for nx x nx tiled square supercells.
 
     This test verifies that the Ewald sum computed for a nx x nx square lattice
     matches the analytical result reported in:
-    'Some static and dynamical properties of a two-dimensional Wigner crystal'.
+    'Bonsall, L., and A. A. Maradudin, Phys. Rev. B 15, 1959–1973 (1977), Fig. 2.'.
 
     Args:
         nx (int): Tiling factor along x and y directions (default is 2).
-    
+
     The function compares the computed result to the reference value within an absolute
     tolerance of 1e-5.
     """
@@ -26,15 +29,18 @@ def test_Square(nx=2):
     axes = nx * axes_primitive
 
     # Generate grid of lattice sites for supercell
-    pos = axes_pos.get_rvecs(axes, (nx, nx))
+    # pos = axes_pos.get_rvecs(axes, (nx, nx))
+    latvec = axes / np.array((nx, nx))[:, None]
+    pos = geo.gen_lattice(latvec, (nx, nx), kspace=False)
 
     # Build Ewald sum objects
     ew, rvecs, kvecs = ewald.make_ewald(axes)
-    total_energy = ew.sum(pos, rvecs, kvecs)
+    charge = -jnp.ones(len(pos))
+    total_energy = ew.sum(pos, charge, rvecs, kvecs)
     energy_per_particle = total_energy / nx**2
 
     # Analytical result from reference (for comparison)
-    ac = axes_pos.volume(axes_primitive)
+    ac = geo.calc_volume(axes_primitive)
     expected = -3.900265 / (2 * ac ** 0.5)
 
     # Assert energy per particle remains consistent
@@ -43,13 +49,6 @@ def test_Square(nx=2):
 
 def test_PrimitiveRectangle(nx=2):
     """Test Ewald sum energy per particle for nx x nx tiled rectangular supercells.
-
-    This test verifies that the Ewald sum computed for an nx x nx rectangular lattice
-    matches the analytical result reported in:
-    'Some static and dynamical properties of a two-dimensional Wigner crystal'.
-
-    Args:
-        nx (int): Tiling factor along x and y directions (default is 2).
 
     The function compares the computed result to the reference value within an absolute
     tolerance of 1e-6.
@@ -64,15 +63,17 @@ def test_PrimitiveRectangle(nx=2):
     axes = nx * axes_primitive
 
     # Generate grid of lattice sites for supercell
-    pos = axes_pos.get_rvecs(axes, (nx, nx))
+    # pos = axes_pos.get_rvecs(axes, (nx, nx))
+    latvec = axes / np.array((nx, nx))[:, None]
+    pos = geo.gen_lattice(latvec, (nx, nx), kspace=False)
 
     # Build Ewald sum objects
     ew, rvecs, kvecs = ewald.make_ewald(axes)
-    total_energy = ew.sum(pos, rvecs, kvecs)
+    charge = -jnp.ones(len(pos))
+    total_energy = ew.sum(pos, charge, rvecs, kvecs)
     energy_per_particle = total_energy / nx**2
 
     # Analytical result from reference (for comparison)
-    ac = axes_pos.volume(axes_primitive)
     expected = -3.898597 / (2 * (a1 * a2) ** 0.5)
 
     # Assert energy per particle remains consistent
@@ -81,13 +82,6 @@ def test_PrimitiveRectangle(nx=2):
 
 def test_CenteredRectangle(nx=2):
     """Test Ewald sum energy per particle for nx x nx tiled centered-rectangle supercells.
-
-    This test verifies that the Ewald sum computed for an nx x nx centered rectangular lattice
-    matches the analytical result reported in:
-    'Some static and dynamical properties of a two-dimensional Wigner crystal'.
-
-    Args:
-        nx (int): Tiling factor along x and y directions (default is 2).
 
     The function compares the computed result to the reference value within an absolute
     tolerance of 1e-6.
@@ -105,15 +99,18 @@ def test_CenteredRectangle(nx=2):
     axes = nx * axes_primitive
 
     # Generate grid of lattice sites for supercell
-    pos = axes_pos.get_rvecs(axes, (nx, nx))
+    # pos = axes_pos.get_rvecs(axes, (nx, nx))
+    latvec = axes / np.array((nx, nx))[:, None]
+    pos = geo.gen_lattice(latvec, (nx, nx), kspace=False)
 
     # Build Ewald sum objects
     ew, rvecs, kvecs = ewald.make_ewald(axes)
-    total_energy = ew.sum(pos, rvecs, kvecs)
+    charge = -jnp.ones(len(pos))
+    total_energy = ew.sum(pos, charge, rvecs, kvecs)
     energy_per_particle = total_energy / nx**2
 
     # Analytical result from reference (for comparison)
-    ac = axes_pos.volume(axes_primitive)
+    ac = geo.calc_volume(axes_primitive)
     expected = -3.900647 / (2 * ac ** 0.5)
 
     # Assert energy per particle remains consistent
@@ -123,13 +120,6 @@ def test_CenteredRectangle(nx=2):
 def test_Hexagon(nx=2):
     """Test Ewald sum energy per particle for nx x nx tiled hexagonal (triangular) supercells.
 
-    This test verifies that the Ewald sum computed for an nx x nx triangular/hexagonal lattice
-    matches the analytical result reported in:
-    'Some static and dynamical properties of a two-dimensional Wigner crystal'.
-
-    Args:
-        nx (int): Tiling factor along x and y directions (default is 3).
-    
     The function compares the computed result to the reference value within an absolute
     tolerance of 1e-6.
     """
@@ -143,15 +133,18 @@ def test_Hexagon(nx=2):
     axes = nx * axes_primitive
 
     # Generate grid of lattice sites for supercell
-    pos = axes_pos.get_rvecs(axes, (nx, nx))
+    # pos = axes_pos.get_rvecs(axes, (nx, nx))
+    latvec = axes / np.array((nx, nx))[:, None]
+    pos = geo.gen_lattice(latvec, (nx, nx), kspace=False)
 
     # Build Ewald sum objects
     ew, rvecs, kvecs = ewald.make_ewald(axes)
-    total_energy = ew.sum(pos, rvecs, kvecs)
+    charge = -jnp.ones(len(pos))
+    total_energy = ew.sum(pos, charge, rvecs, kvecs)
     energy_per_particle = total_energy / nx**2
 
     # Analytical result from reference (for comparison)
-    ac = axes_pos.volume(axes_primitive)
+    ac = geo.calc_volume(axes_primitive)
     expected = -3.921034 / (2 * ac**0.5)
 
     # Assert energy per particle remains consistent
