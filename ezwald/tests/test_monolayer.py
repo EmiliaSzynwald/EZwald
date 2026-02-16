@@ -6,7 +6,7 @@ Compares Ewald sum energies per particle to analytical references from
 
 import numpy as np
 import jax.numpy as jnp
-from jewald import ewald, geometry as geo
+from ezwald import ewald, geometry as geo
 
 
 def test_Square(nx=2):

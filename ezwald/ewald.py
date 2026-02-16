@@ -7,7 +7,7 @@ into real-space (short-range), reciprocal-space (long-range), and constant
 
 import jax.numpy as jnp
 from jax.scipy.special import erfc
-from jewald import lattice, sofk, geometry as geo
+from ezwald import lattice, sofk, geometry as geo
 
 
 def make_ewald(axes, rckc=30.0):

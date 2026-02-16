@@ -10,8 +10,8 @@ import os
 
 import jax.numpy as jnp
 import sys
-from jewald import bilayer_sum
-from jewald import geometry as geo
+from ezwald import bilayer_sum
+from ezwald import geometry as geo
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
 test_cases_staggered_square = [
