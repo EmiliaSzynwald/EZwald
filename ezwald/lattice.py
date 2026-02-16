@@ -6,7 +6,7 @@ the real- and reciprocal-space sums.
 """
 
 import jax.numpy as jnp
-from jewald import geometry as geo
+from ezwald import geometry as geo
 
 
 def make_lattice(axes, rckc):

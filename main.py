@@ -40,7 +40,7 @@ def main():
     os.environ['JAX_PLATFORM_NAME'] = 'cpu'
   import jax
   import jax.numpy as jnp
-  from jewald import ewald, lattice, geometry as geo
+  from ezwald import ewald, lattice, geometry as geo
   print(jax.devices())
   rng = np.random.default_rng(args.seed)
 
