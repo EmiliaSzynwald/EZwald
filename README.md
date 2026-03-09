@@ -2,7 +2,7 @@
 
 [![pytest](https://github.com/EmiliaSzynwald/jax-ewald/actions/workflows/pytest.yml/badge.svg)](https://github.com/EmiliaSzynwald/jax-ewald/actions/workflows/pytest.yml)
 
-EZwald is an open-source Python library delivering efficient tools to study charged multilayer van der Waals devices with defects, built on JAX for automatic differentiation.
+EZwald is an open-source Python library delivering efficient tools to study charged multilayer van der Waals devices with defects, evalutating electrostatic energy of systems with geometry optimization capabilites, built on JAX for automatic differentiation.
 
 - **Homepage:**
 - **Documentation:**
