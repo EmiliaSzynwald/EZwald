@@ -16,3 +16,4 @@ EZwald is an open-source Python library delivering efficient tools to study char
 If you are new to EZwald, start with our tutorials page, where we provide several ready‑to‑run examples that illustrate common use cases and are intended to be modified to fit your needs.
 
 ## License
+[MIT License](https://github.com/EmiliaSzynwald/EZwald/blob/main/LICENSE)
