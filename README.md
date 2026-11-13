@@ -22,7 +22,7 @@ Install EZwald from PyPI:
 pip install ezwald
 ```
 
-The tutorials also use `matplotlib` and `pandas`:
+The tutorials also use `matplotlib` and `scipy`:
 
 ```bash
 pip install matplotlib pandas
