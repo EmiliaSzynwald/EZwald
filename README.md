@@ -5,6 +5,7 @@
 EZwald is an easy-to-use Ewald summation code for quasi-two-dimensional charged systems, built on JAX. It runs on GPUs and optimizes both the particle positions and the shape of the simulation cell, including systems with different charges per layer and point defects such as vacancies and interstitials. As the layers are pulled apart, the optimizer finds the stable crystal phases and the transition phases between them on its own. The code is modular, so it can serve as the energy calculator in a molecular dynamics or Monte Carlo program, or be extended to model new experiments.
 
 - **Homepage:** https://dancing-electrons.github.io/research/students/
+- **Documentation:**
 - **Tutorials:** [`tutorials/`](tutorials/)
 
 ## Features
